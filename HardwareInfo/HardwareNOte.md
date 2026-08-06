@@ -1,0 +1,1 @@
+The needed hardware wil depend on the size of the ai model
