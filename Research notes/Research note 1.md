@@ -34,3 +34,5 @@ sudo apt install openssh-server
 sudo systemctl enable --now ssh
 - Проверка на ip адреса: hostname -I
 - после от dev машината: ssh твоят_потребител@192.168.1.50
+2. Да се направи локален ip  адрес на сървър машината
+ - 
