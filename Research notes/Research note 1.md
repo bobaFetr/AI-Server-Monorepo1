@@ -15,9 +15,10 @@ The server back end must support comunication models like:
  - стабилен ip адрес
  - удостоверяване
  - автентикация
-The first python program must be a console app with some basic commands
+
 Лаптоп с Python ───────────────┐
                               │ HTTP API + JSON
 Raspberry Pi с Python ─────────┼────────► Ubuntu Server
                               │           C# / ASP.NET Core
 Телефонни известия ◄───────────┘
+- The first python program must be a console app with some basic commands
