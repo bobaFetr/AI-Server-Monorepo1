@@ -22,3 +22,9 @@ Raspberry Pi с Python ─────────┼────────►
                               │           C# / ASP.NET Core
 Телефонни известия ◄───────────┘
 - The first python program must be a console app with some basic commands
+
+1. The ubuntu server does will not need GUI
+- Vscode on laptop
+- Install Remote - SSH
+- connect to the physical ubuntu server
+- Edit the files on the server like they are local
