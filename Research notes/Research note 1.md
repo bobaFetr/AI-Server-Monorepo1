@@ -28,3 +28,9 @@ Raspberry Pi с Python ─────────┼────────►
 - Install Remote - SSH
 - connect to the physical ubuntu server
 - Edit the files on the server like they are local
+- На Ubuntu
+- sudo apt update
+sudo apt install openssh-server
+sudo systemctl enable --now ssh
+- Проверка на ip адреса: hostname -I
+- после от dev машината: ssh твоят_потребител@192.168.1.50
