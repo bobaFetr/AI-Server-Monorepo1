@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "7fb300972f9ea913",
+        "id": "2e6cff7959869dd0",
         "type": "tabs",
         "children": [
           {
-            "id": "e83fa7aa997f6968",
+            "id": "da3e27c846fad838",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -19,22 +19,6 @@
               },
               "icon": "lucide-file",
               "title": "Research note 1"
-            }
-          }
-        ]
-      },
-      {
-        "id": "2e6cff7959869dd0",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "da3e27c846fad838",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
             }
           }
         ]
@@ -204,10 +188,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "89035449713db748",
+  "active": "da3e27c846fad838",
   "lastOpenFiles": [
-    "Welcome.md",
+    "Photos/Screenshot 2026-08-07 021142.png",
     "Research notes/Research note 1.md",
+    "Welcome.md",
     "Research notes",
     "Photos"
   ]
