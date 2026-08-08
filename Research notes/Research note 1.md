@@ -38,3 +38,61 @@ sudo systemctl enable --now ssh
  - В настройките на рутера да направя DHCP reservation за MAC адреса на убунту машината
  - За начинаещи не(другия вариант е да се използва статичен адрес чрез NetPlan)
  3. C# API на Ubuntu
+  - dotnet new web -n AiServer
+cd AiServer
+- var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+var expectedApiKey =
+    Environment.GetEnvironmentVariable("AI_SERVER_API_KEY")
+    ?? throw new InvalidOperationException(
+        "Environment variable AI_SERVER_API_KEY is missing.");
+
+app.MapGet("/api/health", () =>
+{
+    return Results.Ok(new
+    {
+        status = "ok",
+        serverTimeUtc = DateTimeOffset.UtcNow
+    });
+});
+
+app.MapPost(
+    "/api/telemetry",
+    IResult (TelemetryMessage message, HttpRequest request) =>
+    {
+        var receivedApiKey =
+            request.Headers["X-Api-Key"].ToString();
+
+        if (!string.Equals(
+                receivedApiKey,
+                expectedApiKey,
+                StringComparison.Ordinal))
+        {
+            return Results.Unauthorized();
+        }
+
+        Console.WriteLine(
+            $"Device: {message.DeviceId}, " +
+            $"Value: {message.Value} {message.Unit}");
+
+        return Results.Ok(new
+        {
+            accepted = true,
+            receivedAtUtc = DateTimeOffset.UtcNow
+        });
+    });
+
+app.Run();
+
+record TelemetryMessage(
+    string DeviceId,
+    double Value,
+    string Unit);
+
+- Временен API ключ - export AI_SERVER_API_KEY="смени-това-с-дълъг-случаен-ключ"
+- стартиране на сървъра
+- автентикация с парола, когато се свързвам към сървъра
+- Първоначално кода на Ubuntu ще трябва да връща записани съобщения. Например:
+- Ai забремени онзи мъж -----> Не мога, защото не съм човек
+- 
