@@ -1,7 +1,7 @@
 import requests
 import json
 
-SERVER_URL = "http://192.168.1.132:5000/api/message"
+SERVER_URL = "http://192.168.1.***:5000/api/message"
 
 message = input("Enter command: ")
 

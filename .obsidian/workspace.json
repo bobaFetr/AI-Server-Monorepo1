@@ -83,8 +83,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "f7c703268ea7e15d",
@@ -191,8 +190,10 @@
   },
   "active": "db3728b1b9a1b887",
   "lastOpenFiles": [
-    "HardwareInfo/HardwareNOte.md",
+    "Untitled/Untitled.canvas",
     "Research notes/Research note 1.md",
+    "Untitled",
+    "HardwareInfo/HardwareNOte.md",
     "HardwareInfo",
     "Photos/Screenshot 2026-08-07 021142.png",
     "Welcome.md",
