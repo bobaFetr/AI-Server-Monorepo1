@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "bf6e844ac1af1a05",
+        "id": "c81f14777cfcc066",
         "type": "tabs",
         "children": [
           {
-            "id": "db3728b1b9a1b887",
+            "id": "2979a221db52c568",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Research notes/Research note 1.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Research note 1"
+              "title": "New tab"
             }
           }
         ]
@@ -185,13 +181,16 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "db3728b1b9a1b887",
+  "active": "2979a221db52c568",
   "lastOpenFiles": [
-    "Untitled/Untitled.canvas",
     "Research notes/Research note 1.md",
+    "Excalidraw/Drawing 2026-08-16 20.02.49.excalidraw.md",
+    "Excalidraw",
+    "Untitled/Untitled.canvas",
     "Untitled",
     "HardwareInfo/HardwareNOte.md",
     "HardwareInfo",
