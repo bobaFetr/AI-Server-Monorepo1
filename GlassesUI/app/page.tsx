@@ -56,7 +56,10 @@ export default function Home() {
             <small>VISUAL TARGET 04</small><strong>{scanning ? "ANALYZING…" : "WORKSTATION"}</strong>
             <div className="confidence"><i /><span>{scanning ? "MODEL INFERENCE" : "CONFIDENCE 94%"}</span></div>
           </div>
-          <div className="lens-footer"><span>ISO 320</span><span>1/120</span><span>RAW + DEPTH</span></div>
+          <div className="lens-telemetry lens-telemetry-left">
+            <div className="battery"><span>BAT 72%</span><i><b /></i><small>4H 18M</small></div>
+            <span>WIFI −58 dBm</span><span>GAZE CALIBRATED</span>
+          </div>
         </article>
 
         <div className="bridge" aria-hidden="true"><i /><span>∞</span></div>
@@ -77,15 +80,12 @@ export default function Home() {
             ))}
           </nav>
           <button className="ask-button" onClick={runScan} disabled={scanning}>{scanning ? "SCANNING 79%" : "◎ CAPTURE SCENE"}</button>
-          <div className="lens-footer"><span>QUEUE 0</span><span>AI READY</span><span>12 MS</span></div>
+          <div className="lens-telemetry lens-telemetry-right">
+            <span className="privacy">◉ CAMERA ACTIVE</span><span>SERVER 192.168.1.50</span>
+            <span>AI READY · 12 MS</span>
+          </div>
         </article>
       </section>
-
-      <footer className="telemetry-bar">
-        <div className="battery"><span>BAT 72%</span><i><b /></i><small>4H 18M</small></div>
-        <span>WIFI −58 dBm</span><span>GAZE CALIBRATED</span>
-        <span className="privacy">◉ CAMERA ACTIVE</span><span>SERVER 192.168.1.50</span>
-      </footer>
       <p className="hint">GAZE TO SELECT · SIDE BUTTON TO CONFIRM · HOLD TO DISMISS</p>
     </main>
   );
