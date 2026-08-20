@@ -1,5 +1,8 @@
 # Hardware notes
 
+> [!note] Detailed research
+> See [[Glasses hardware research]] for the proposed Raspberry Pi companion, camera, microphone, display, battery, power, safety, and staged prototype plan.
+
 The required server hardware depends on the selected multimodal model, quantization, context/image size, desired response latency, and number of simultaneous devices. Do not buy final hardware from parameter count alone: benchmark the exact model/runtime first.
 
 See [[AI glasses server architecture]] for the full system and milestone plan.
