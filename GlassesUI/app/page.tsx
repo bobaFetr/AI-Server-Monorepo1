@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
 const actions = [
   { id: "look", icon: "◉", label: "LOOK & ASK", meta: "VISION QUERY" },
@@ -20,6 +20,9 @@ export default function Home() {
   const [active, setActive] = useState("look");
   const [scanning, setScanning] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [aimOffset, setAimOffset] = useState({ x: 0, y: 0 });
+  const [aimDragging, setAimDragging] = useState(false);
+  const dragOrigin = useRef({ x: 0, y: 0 });
   const [clock, setClock] = useState("12:08:39");
   const response = responses[active];
 
@@ -34,6 +37,28 @@ export default function Home() {
     setActive("look");
     setScanning(true);
     window.setTimeout(() => setScanning(false), 1800);
+  }
+
+  function startAimDrag(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragOrigin.current = { x: event.clientX - aimOffset.x, y: event.clientY - aimOffset.y };
+    setAimDragging(true);
+  }
+
+  function moveAim(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!aimDragging) return;
+    const clamp = (value: number, limit: number) => Math.max(-limit, Math.min(limit, value));
+    setAimOffset({
+      x: clamp(event.clientX - dragOrigin.current.x, 190),
+      y: clamp(event.clientY - dragOrigin.current.y, 150),
+    });
+  }
+
+  function releaseAim() {
+    setAimDragging(false);
+    setAimOffset({ x: 0, y: 0 });
   }
 
   return (
@@ -51,8 +76,22 @@ export default function Home() {
           <div className="corner-data top-right"><span>FOV 82°</span><small>AUTO EXPOSURE</small></div>
           <div className="range-scale" aria-hidden="true">{Array.from({ length: 11 }, (_, i) => <i key={i} />)}</div>
           <div className="scan-line" aria-hidden="true" />
-          <div className="reticle" aria-hidden="true"><span /><b>+</b></div>
-          <div className="target-chip">04</div>
+          <div
+            className={`aim-control ${aimDragging ? "is-dragging" : ""}`}
+            style={{ transform: `translate(calc(-50% + ${aimOffset.x}px), calc(-50% + ${aimOffset.y}px))` }}
+            onPointerDown={startAimDrag}
+            onPointerMove={moveAim}
+            onPointerUp={releaseAim}
+            onPointerCancel={releaseAim}
+            onLostPointerCapture={releaseAim}
+            role="slider"
+            aria-label="Scene targeting reticle"
+            aria-valuetext={aimDragging ? "Targeting reticle moved" : "Targeting reticle centered"}
+            tabIndex={0}
+          >
+            <div className="reticle" aria-hidden="true"><span /><b>+</b></div>
+            <div className="target-chip">04</div>
+          </div>
           <div className="target-card">
             <small>VISUAL TARGET 04</small><strong>{scanning ? "ANALYZING…" : "WORKSTATION"}</strong>
             <div className="confidence"><i /><span>{scanning ? "MODEL INFERENCE" : "CONFIDENCE 94%"}</span></div>
@@ -98,7 +137,7 @@ export default function Home() {
           </div>
         </article>
       </section>
-      <p className="hint">GAZE TO SELECT · SIDE BUTTON TO CONFIRM · HOLD TO DISMISS</p>
+      <p className="hint">DRAG RETICLE TO AIM · GAZE TO SELECT · SIDE BUTTON TO CONFIRM</p>
     </main>
   );
 }
