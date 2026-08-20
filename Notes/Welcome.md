@@ -4,9 +4,9 @@ This vault describes a wearable AI-glasses system backed by a local Ubuntu AI se
 
 ## Start here
 
-- [[Research notes/AI glasses server architecture]] — consolidated architecture, protocols, data model, security, and roadmap
-- [[Research notes/Research note 1]] — original exploration and Ubuntu setup notes
-- [[HardwareInfo/HardwareNOte]] — hardware decisions still to be benchmarked
+- [[AI glasses server architecture]] — consolidated architecture, protocols, data model, security, and roadmap
+- [[Research note 1]] — original exploration and Ubuntu setup notes
+- [[HardwareNOte]] — hardware decisions still to be benchmarked
 - `PythonClient/client.py` — current command-line client
 - `UbuntuServerOSVMCode-main/UbuntuServerOSVMCode-main/` — ASP.NET Core prototype
 

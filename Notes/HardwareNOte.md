@@ -2,7 +2,7 @@
 
 The required server hardware depends on the selected multimodal model, quantization, context/image size, desired response latency, and number of simultaneous devices. Do not buy final hardware from parameter count alone: benchmark the exact model/runtime first.
 
-See [[Research notes/AI glasses server architecture]] for the full system and milestone plan.
+See [[AI glasses server architecture]] for the full system and milestone plan.
 
 ## Server measurements to record
 

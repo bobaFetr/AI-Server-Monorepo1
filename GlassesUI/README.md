@@ -45,6 +45,6 @@ npm test
 
 ## Planned integration
 
-The React interface should communicate with a local Python device service. Python will own the camera, battery controller, eye tracker, microphone, offline queue, and communication with the C# server. See `../Research notes/AI glasses server architecture.md` for the system design.
+The React interface should communicate with a local Python device service. Python will own the camera, battery controller, eye tracker, microphone, offline queue, and communication with the C# server. See `../Notes/AI glasses server architecture.md` for the system design.
 
 This project is part of the main `AiServerReasearchNotes` repository and must not be treated as a separate Git repository.

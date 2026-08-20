@@ -13,7 +13,7 @@
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Excalidraw/Drawing 2026-08-16 20.02.49.excalidraw.md"
+                "file": "Notes/Drawing 2026-08-16 20.02.49.excalidraw.md"
               },
               "icon": "excalidraw-icon",
               "title": "Drawing 2026-08-16 20.02.49.excalidraw"
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Research notes/Research note 1.md",
+                "file": "Notes/Research note 1.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -116,7 +116,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Research notes/Research note 1.md",
+                "file": "Notes/Research note 1.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -159,7 +159,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Research notes/Research note 1.md",
+                "file": "Notes/Research note 1.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -189,16 +189,15 @@
   },
   "active": "2979a221db52c568",
   "lastOpenFiles": [
-    "Excalidraw/Drawing 2026-08-16 20.02.49.excalidraw.md",
-    "Research notes/Research note 1.md",
-    "Excalidraw",
+    "Notes/Drawing 2026-08-16 20.02.49.excalidraw.md",
+    "Notes/Research note 1.md",
+    "Notes/AI glasses server architecture.md",
+    "Notes/HardwareNOte.md",
+    "Notes/Welcome.md",
+    "Notes",
     "Untitled/Untitled.canvas",
     "Untitled",
-    "HardwareInfo/HardwareNOte.md",
-    "HardwareInfo",
     "Photos/Screenshot 2026-08-07 021142.png",
-    "Welcome.md",
-    "Research notes",
     "Photos"
   ]
 }
