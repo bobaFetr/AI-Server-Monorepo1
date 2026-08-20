@@ -8,7 +8,18 @@ const actions = [
   { id: "recent", icon: "▤", label: "RECENT", meta: "3 ANSWERS" },
   { id: "map", icon: "⌖", label: "MAP", meta: "NAVIGATION" },
   { id: "calibrate", icon: "⊕", label: "CALIBRATE", meta: "EYE TRACKER" },
+  { id: "terminator", icon: "▰", label: "TERMINATOR CODE", meta: "CODE STREAM" },
 ] as const;
+
+const terminatorLines = [
+  "4000  A2 00       LDX #$00", "4002  A0 10       LDY #$10", "4004  BD 00 02    LDA $0200,X",
+  "4007  9D 00 04    STA $0400,X", "400A  E8          INX", "400B  D0 F7       BNE $4004",
+  "400D  AD 00 C0    LDA $C000", "4010  29 7F       AND #$7F", "4012  C9 20       CMP #$20",
+  "4014  90 12       BCC $4028", "4016  99 00 03    STA $0300,Y", "4019  88          DEY",
+  "401A  D0 FA       BNE $4016", "401C  18          CLC", "401D  69 01       ADC #$01",
+  "401F  85 FE       STA $FE", "4021  A5 FF       LDA $FF", "4023  49 80       EOR #$80",
+  "4025  85 FF       STA $FF", "4027  EA          NOP", "4028  4C 00 40    JMP $4000",
+];
 
 const targets = [
   { name: "WORKSTATION", detail: "A workstation with a display, keyboard, and dark desktop surface.", confidence: 94 },
@@ -42,6 +53,7 @@ export default function Home() {
   const dragOrigin = useRef({ x: 0, y: 0 });
   const scanTimer = useRef<number | undefined>(undefined);
   const [clock, setClock] = useState("12:08:39");
+  const [terminatorLine, setTerminatorLine] = useState(6);
   const target = targetFor(aimOffset.x, aimOffset.y);
 
   useEffect(() => {
@@ -50,6 +62,13 @@ export default function Home() {
     const timer = window.setInterval(tick, 1000);
     return () => { window.clearInterval(timer); if (scanTimer.current) window.clearTimeout(scanTimer.current); };
   }, []);
+
+  useEffect(() => {
+    if (active !== "terminator") return;
+    setTerminatorLine(6);
+    const timer = window.setInterval(() => setTerminatorLine((line) => (line + 1) % terminatorLines.length), 150);
+    return () => window.clearInterval(timer);
+  }, [active]);
 
   async function runScan() {
     if (!connected || !cameraActive) { setNotice(!connected ? "LINK REQUIRED" : "ENABLE CAMERA"); return; }
@@ -72,6 +91,7 @@ export default function Home() {
 
   function loadCapture(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null; setCapturedImage(file); setModelAnswer(null);
+    if (file && file.size > 5 * 1024 * 1024) { event.target.value = ""; setCapturedImage(null); setNotice("FRAME REJECTED · MAX 5 MB"); return; }
     setNotice(file ? `FRAME LOADED · ${(file.size / 1024).toFixed(0)} KB` : "FRAME CLEARED");
   }
 
@@ -109,6 +129,7 @@ export default function Home() {
   if (active === "recent") { answerTitle = "RECENT RESPONSES"; answerText = "Select a stored answer to bring it back into focus."; }
   if (active === "map") { answerTitle = "LOCAL MAP"; answerText = "Navigation ready. Current position is centered near Sofia with the server link active."; }
   if (active === "calibrate") { answerTitle = "GAZE CALIBRATION"; answerText = calibration === 100 ? "Calibration complete. Eye tracking quality is excellent." : "Focus on each point and confirm with the side control."; }
+  if (active === "terminator") { answerTitle = "TERMINATOR CODE"; answerText = "PROCESSOR STREAM ACTIVE"; }
   const primaryLabel = active === "voice" ? (listening ? "■ STOP LISTENING" : "⌁ START LISTENING") : active === "calibrate" ? `⊕ CONFIRM POINT ${Math.min(4, calibration / 25 + 1)}/4` : scanning ? "SCANNING 79%" : "◎ CAPTURE SCENE";
 
   return (
@@ -127,7 +148,7 @@ export default function Home() {
         <article className="lens lens-right">
           <div className="corner-data top-left"><span>R // ASSISTANT</span><small>GEMMA VISION · LOCAL</small></div><div className="corner-data right-clock"><span>{clock}</span><small>UTC +03:00</small></div>
           <button className={`menu-toggle ${menuOpen ? "is-open" : ""}`} type="button" aria-label={menuOpen ? "Close glasses menu" : "Open glasses menu"} aria-expanded={menuOpen} aria-controls="glasses-menu" onClick={() => setMenuOpen((open) => !open)}><i /><i /><i /></button>
-          <div className="answer-card" aria-live="polite"><div className="answer-heading"><span className="pulse-orb" /><small>{scanning ? "ANALYZING FRAME" : answerTitle}</small><em>{scanning ? "79%" : listening ? "LIVE" : "READY"}</em></div><p>{scanning ? "Extracting objects and spatial context from the captured frame…" : answerText}</p>
+          <div className={`answer-card ${active === "terminator" ? "terminator-card" : ""}`} aria-live="polite"><div className="answer-heading"><span className="pulse-orb" /><small>{scanning ? "ANALYZING FRAME" : answerTitle}</small><em>{scanning ? "79%" : listening || active === "terminator" ? "LIVE" : "READY"}</em></div>{active === "terminator" ? <pre className="terminator-code">{Array.from({ length: 12 }, (_, offset) => terminatorLines[(terminatorLine - 5 + offset + terminatorLines.length) % terminatorLines.length]).join("\n")}</pre> : <p>{scanning ? "Extracting objects and spatial context from the captured frame…" : answerText}</p>}
             {active === "recent" && <div className="recent-list">{recentAnswers.map((item, index) => <button key={item} onClick={() => { setNotice(`OPENED RESPONSE 0${index + 1}`); setActive(index === 2 ? "map" : "look"); }}>{`0${index + 1}`} <span>{item}</span></button>)}</div>}
             {active === "map" && <div className="mini-map" aria-label="Local navigation map"><i className="route route-a" /><i className="route route-b" /><i className="map-grid" /><b className="map-marker">●</b><span>N 42.6977<br />E 23.3219</span></div>}
             {active === "calibrate" && <div className="calibration-meter"><i style={{ width: `${calibration}%` }} /><span>{calibration}%</span></div>}

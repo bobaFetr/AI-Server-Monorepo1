@@ -14,6 +14,7 @@ public static class VisionEndpoints
     private static async Task<IResult> AnalyzeAsync(
         HttpRequest request,
         IVisionModelClient visionModel,
+        VisionInferenceGate inferenceGate,
         IConfiguration configuration,
         ILogger<Program> logger,
         CancellationToken cancellationToken)
@@ -23,7 +24,7 @@ public static class VisionEndpoints
 
         IFormCollection form;
         try { form = await request.ReadFormAsync(cancellationToken); }
-        catch (InvalidDataException) { return Problem("invalid_form", "The multipart form is invalid.", 400); }
+        catch (InvalidDataException) { return Problem("invalid_form", "The multipart form is invalid or too large.", 413); }
 
         var image = form.Files.GetFile("image");
         var prompt = form["prompt"].ToString().Trim();
@@ -44,18 +45,33 @@ public static class VisionEndpoints
             await stream.CopyToAsync(memory, cancellationToken);
             bytes = memory.ToArray();
         }
-        if (!ImageValidation.TryDetect(bytes, out var mediaType))
-            return Problem("unsupported_image", "Only decoded JPEG and WebP image data is accepted.", 415);
+        var maxWidth = configuration.GetValue("Vision:MaxWidth", 1920);
+        var maxHeight = configuration.GetValue("Vision:MaxHeight", 1080);
+        if (!ImageValidation.TryDecodeAndSanitize(bytes, maxWidth, maxHeight, out var validated, out var validationError))
+            return Problem("invalid_image", validationError, 415);
+
+        if (!inferenceGate.TryEnter(out var inferenceLease))
+        {
+            request.HttpContext.Response.Headers.RetryAfter = "2";
+            return Problem("inference_busy", "The vision model is busy. Try again shortly.", 503);
+        }
+        using (inferenceLease)
+        {
 
         var stopwatch = Stopwatch.StartNew();
         try
         {
-            var answer = await visionModel.DescribeAsync(bytes, prompt, mediaType, cancellationToken);
+            var answer = await visionModel.DescribeAsync(validated!.Bytes, prompt, validated.MediaType, cancellationToken);
             stopwatch.Stop();
             return Results.Ok(new VisionResponse(requestId, answer,
                 configuration["Vision:Model"] ?? "gemma3:4b", stopwatch.ElapsedMilliseconds, DateTimeOffset.UtcNow));
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { return Results.StatusCode(499); }
+        catch (OperationCanceledException exception)
+        {
+            logger.LogWarning(exception, "Vision model request {RequestId} timed out.", requestId);
+            return Problem("model_timeout", "The local vision model timed out.", 504);
+        }
         catch (HttpRequestException exception)
         {
             logger.LogError(exception, "Vision model request {RequestId} failed.", requestId);
@@ -65,6 +81,7 @@ public static class VisionEndpoints
         {
             logger.LogError(exception, "Vision request {RequestId} failed.", requestId);
             return Problem("inference_failed", "Vision inference failed.", 500);
+        }
         }
     }
 

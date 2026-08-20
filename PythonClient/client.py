@@ -247,7 +247,7 @@ def main() -> int:
     except ValueError as error:
         print(error, file=sys.stderr)
         return 2
-    except (urllib.error.URLError, TimeoutError) as error:
+    except (urllib.error.URLError, TimeoutError, OSError) as error:
         print(f"Connection failed: {error}", file=sys.stderr)
         return 1
 

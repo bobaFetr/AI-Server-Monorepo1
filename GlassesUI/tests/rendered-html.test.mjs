@@ -28,6 +28,7 @@ test("server-renders the ARGUS glasses interface", async () => {
   assert.match(html, /CAMERA ACTIVE/i);
   assert.match(html, /Open glasses menu/i);
   assert.match(html, />MAP</i);
+  assert.match(html, /TERMINATOR CODE/i);
   assert.match(html, /Scene targeting reticle/i);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
 });

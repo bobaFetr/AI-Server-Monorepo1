@@ -1,8 +1,14 @@
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = false);
+builder.Services.Configure<FormOptions>(options =>
+    options.MultipartBodyLengthLimit = builder.Configuration.GetValue("Vision:MaxRequestBytes", 5_300_000));
+builder.WebHost.ConfigureKestrel(options =>
+    options.Limits.MaxRequestBodySize = builder.Configuration.GetValue("Vision:MaxRequestBytes", 5_300_000));
+builder.Services.AddSingleton<VisionInferenceGate>();
 builder.Services.AddHttpClient<IVisionModelClient, OllamaVisionModelClient>((services, client) =>
 {
     var configuration = services.GetRequiredService<IConfiguration>();
