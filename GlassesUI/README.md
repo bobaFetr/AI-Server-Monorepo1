@@ -14,7 +14,16 @@ ARGUS is an interactive React prototype for the AI-glasses project. It presents 
 - draggable targeting reticle that returns to center when released
 - simulated capture/analysis state and responsive narrow-screen layout
 
-All values and responses are currently simulated. The interface is not yet connected to the Python device agent, physical glasses sensors, ASP.NET Core server, PostgreSQL, or a vision model.
+Telemetry and hardware input remain simulated. The interface can now upload a selected camera frame through its server-side proxy to the ASP.NET Core vision endpoint and display a real local-model response.
+
+Set these server-only environment variables before starting ARGUS:
+
+```bash
+ARGUS_SERVER_URL=http://127.0.0.1:5024
+ARGUS_API_KEY=replace-with-the-server-api-key
+```
+
+The API key stays on the UI server and is not sent to browser JavaScript. Without these values, the interactive simulated capture flow remains available.
 
 ## Requirements
 

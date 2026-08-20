@@ -75,6 +75,22 @@ Use these routes for new integrations:
 | `GET /api/v1/server/diagnostics` | Returns detailed diagnostics | `X-API-Key` |
 | `POST /api/v1/power/restart` | Schedules a Linux restart | `X-Admin-API-Key` |
 | `POST /api/v1/power/shutdown` | Schedules a Linux shutdown | `X-Admin-API-Key` |
+| `POST /api/v1/vision/analyze` | Analyzes a JPEG/WebP image with the local vision model | `X-API-Key` |
+
+## Vision analysis
+
+The vision endpoint accepts `multipart/form-data` with an `image`, optional `prompt`, and optional UUID `requestId`. Images are limited to 5 MB by default and must contain JPEG or WebP data. Configure the local Ollama adapter with:
+
+```bash
+export Vision__OllamaUrl="http://127.0.0.1:11434"
+export Vision__Model="gemma3:4b"
+```
+
+Upload an image with the included Python client:
+
+```bash
+python3 testserver_client.py --image ./capture.jpg --prompt "What is at the center?"
+```
 
 Readiness requires the standard key configuration. It requires the administrator key configuration only when restart or shutdown is enabled.
 

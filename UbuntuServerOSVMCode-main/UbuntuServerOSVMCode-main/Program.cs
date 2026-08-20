@@ -3,6 +3,12 @@ using System.Threading.RateLimiting;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = false);
+builder.Services.AddHttpClient<IVisionModelClient, OllamaVisionModelClient>((services, client) =>
+{
+    var configuration = services.GetRequiredService<IConfiguration>();
+    client.BaseAddress = new Uri(configuration["Vision:OllamaUrl"] ?? "http://127.0.0.1:11434");
+    client.Timeout = TimeSpan.FromSeconds(configuration.GetValue("Vision:TimeoutSeconds", 90));
+});
 
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 builder.Services.AddRateLimiter(options =>
@@ -55,4 +61,5 @@ app.UseRateLimiter();
 app.UseMiddleware<ApiKeyAuthenticationMiddleware>();
 app.MapMessageEndpoints();
 app.MapInfrastructureEndpoints();
+app.MapVisionEndpoints();
 app.Run();

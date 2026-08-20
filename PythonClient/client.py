@@ -6,8 +6,10 @@ import json
 import os
 import ssl
 import sys
+import uuid
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 
 ACTIONS = {
@@ -84,6 +86,32 @@ def send_command(
         return error.code, decode_response(error.read())
 
 
+def send_vision(
+    base_url: str, api_key: str, image_path: str, prompt: str,
+    timeout: float = 90, insecure: bool = False,
+) -> tuple[int, object]:
+    path = Path(image_path)
+    image = path.read_bytes()
+    if image.startswith(b"\xff\xd8\xff"):
+        media_type = "image/jpeg"
+    elif len(image) >= 12 and image[:4] == b"RIFF" and image[8:12] == b"WEBP":
+        media_type = "image/webp"
+    else:
+        raise ValueError("Image must contain JPEG or WebP data.")
+    boundary = f"argus-{uuid.uuid4().hex}"
+    parts: list[bytes] = []
+    for name, value in (("prompt", prompt), ("requestId", str(uuid.uuid4()))):
+        parts.extend([f"--{boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n".encode(), value.encode("utf-8"), b"\r\n"])
+    parts.extend([f"--{boundary}\r\nContent-Disposition: form-data; name=\"image\"; filename=\"capture{path.suffix}\"\r\nContent-Type: {media_type}\r\n\r\n".encode(), image, b"\r\n", f"--{boundary}--\r\n".encode()])
+    request = urllib.request.Request(f"{base_url.rstrip('/')}/api/v1/vision/analyze", data=b"".join(parts), headers={"Accept": "application/json", "X-API-Key": api_key, "Content-Type": f"multipart/form-data; boundary={boundary}"}, method="POST")
+    context = ssl._create_unverified_context() if insecure else None
+    try:
+        with urllib.request.urlopen(request, timeout=timeout, context=context) as response:
+            return response.status, decode_response(response.read())
+    except urllib.error.HTTPError as error:
+        return error.code, decode_response(error.read())
+
+
 def send_action(
     base_url: str,
     action: str,
@@ -145,6 +173,8 @@ def parse_args() -> argparse.Namespace:
         choices=sorted(ACTIONS),
         help="Call a versioned structured API route and exit.",
     )
+    mode.add_argument("--image", help="Upload a JPEG/WebP image for vision analysis.")
+    parser.add_argument("--prompt", default="Describe the scene and identify the object at the center.", help="Question sent with --image.")
     parser.add_argument("--timeout", type=float, default=15, help="Timeout in seconds.")
     parser.add_argument(
         "--insecure",
@@ -169,6 +199,13 @@ def main() -> int:
                 args.timeout,
                 args.insecure,
             )
+            print_response(status, response)
+            return 0 if 200 <= status < 300 else 1
+
+        if args.image:
+            if not args.api_key:
+                raise ValueError("Missing API key. Set TESTSERVER_API_KEY or use --api-key.")
+            status, response = send_vision(args.url, args.api_key, args.image, args.prompt, max(args.timeout, 90), args.insecure)
             print_response(status, response)
             return 0 if 200 <= status < 300 else 1
 
