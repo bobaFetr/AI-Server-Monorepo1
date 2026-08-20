@@ -1,3 +1,8 @@
+# Early research notes
+
+> [!note] Consolidated design
+> This is the original exploration. The current architecture and recommendations are in [[AI glasses server architecture]].
+
 Схема
 Първо ше тествам python client кода на машината преди да го прехвърля на 
 raswberry pie.
@@ -101,4 +106,4 @@ sudo ufw allow proto tcp from 192.168.1.0/24 to any port 5000
 sudo ufw enable
 sudo ufw status
 - Това ще разреши порт 5000 да се ползва от локалната мрежа
-4. Тестване на връзката 
+4. Тестване на връзката

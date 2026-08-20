@@ -11,10 +11,12 @@
             "id": "2979a221db52c568",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "excalidraw",
+              "state": {
+                "file": "Excalidraw/Drawing 2026-08-16 20.02.49.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Drawing 2026-08-16 20.02.49.excalidraw"
             }
           }
         ]
@@ -187,8 +189,8 @@
   },
   "active": "2979a221db52c568",
   "lastOpenFiles": [
-    "Research notes/Research note 1.md",
     "Excalidraw/Drawing 2026-08-16 20.02.49.excalidraw.md",
+    "Research notes/Research note 1.md",
     "Excalidraw",
     "Untitled/Untitled.canvas",
     "Untitled",
