@@ -21,9 +21,12 @@ Set these server-only environment variables before starting ARGUS:
 ```bash
 ARGUS_SERVER_URL=http://127.0.0.1:5024
 ARGUS_API_KEY=replace-with-the-server-api-key
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=replace-with-a-browser-restricted-google-maps-key
 ```
 
 The API key stays on the UI server and is not sent to browser JavaScript. Without these values, the interactive simulated capture flow remains available.
+
+The Google Maps key is intentionally browser-visible and must be restricted to the UI's allowed HTTP referrers in Google Cloud. Enable the Maps Embed API for the key. Without it, Map mode displays a configuration notice instead of an interactive map.
 
 ## Requirements
 
