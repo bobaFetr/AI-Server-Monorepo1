@@ -19,6 +19,7 @@ const responses: Record<string, { title: string; text: string }> = {
 export default function Home() {
   const [active, setActive] = useState("look");
   const [scanning, setScanning] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [clock, setClock] = useState("12:08:39");
   const response = responses[active];
 
@@ -66,15 +67,26 @@ export default function Home() {
 
         <article className="lens lens-right">
           <div className="corner-data top-left"><span>R // ASSISTANT</span><small>GEMMA VISION · LOCAL</small></div>
-          <div className="corner-data top-right"><span>{clock}</span><small>UTC +03:00</small></div>
+          <div className="corner-data right-clock"><span>{clock}</span><small>UTC +03:00</small></div>
+          <button
+            className={`menu-toggle ${menuOpen ? "is-open" : ""}`}
+            type="button"
+            aria-label={menuOpen ? "Close glasses menu" : "Open glasses menu"}
+            aria-expanded={menuOpen}
+            aria-controls="glasses-menu"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <i /><i /><i />
+          </button>
           <div className="answer-card" aria-live="polite">
             <div className="answer-heading"><span className="pulse-orb" /><small>{scanning ? "ANALYZING FRAME" : response.title}</small><em>{scanning ? "79%" : "READY"}</em></div>
             <p>{scanning ? "Extracting objects and spatial context from the captured frame…" : response.text}</p>
             <div className="waveform" aria-hidden="true">{Array.from({ length: 24 }, (_, i) => <i key={i} style={{ height: `${7 + ((i * 13) % 22)}px` }} />)}</div>
           </div>
-          <nav className="action-grid" aria-label="Glasses menu">
+          <nav id="glasses-menu" className={`action-grid ${menuOpen ? "menu-visible" : ""}`} aria-label="Glasses menu" aria-hidden={!menuOpen}>
+            <div className="menu-heading"><span>APPLICATION MENU</span><small>SELECT MODULE</small></div>
             {actions.map((item) => (
-              <button key={item.id} className={active === item.id ? "active" : ""} onClick={() => { setActive(item.id); setScanning(false); }} aria-pressed={active === item.id}>
+              <button key={item.id} tabIndex={menuOpen ? 0 : -1} className={active === item.id ? "active" : ""} onClick={() => { setActive(item.id); setScanning(false); setMenuOpen(false); }} aria-pressed={active === item.id}>
                 <span className="action-icon">{item.icon}</span><span>{item.label}<small>{item.meta}</small></span><b>›</b>
               </button>
             ))}
