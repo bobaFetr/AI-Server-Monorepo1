@@ -6,6 +6,7 @@ const actions = [
   { id: "look", icon: "◉", label: "LOOK & ASK", meta: "VISION QUERY" },
   { id: "voice", icon: "⌁", label: "VOICE", meta: "LISTEN MODE" },
   { id: "recent", icon: "▤", label: "RECENT", meta: "3 ANSWERS" },
+  { id: "map", icon: "⌖", label: "MAP", meta: "NAVIGATION" },
   { id: "calibrate", icon: "⌖", label: "CALIBRATE", meta: "EYE TRACKER" },
 ];
 
@@ -13,6 +14,7 @@ const responses: Record<string, { title: string; text: string }> = {
   look: { title: "VISUAL ANALYSIS", text: "I can see a workstation with a display, keyboard, and a dark desktop surface." },
   voice: { title: "VOICE CHANNEL", text: "Listening locally. Ask a question when the waveform turns solid." },
   recent: { title: "RECENT RESPONSE 03", text: "Your server was healthy. Vision model latency was 1.8 seconds." },
+  map: { title: "LOCAL MAP", text: "Navigation ready. Current position is centered near Sofia with the server link active." },
   calibrate: { title: "GAZE CALIBRATION", text: "Focus on the left reticle, then confirm with the side control." },
 };
 
@@ -120,6 +122,7 @@ export default function Home() {
           <div className="answer-card" aria-live="polite">
             <div className="answer-heading"><span className="pulse-orb" /><small>{scanning ? "ANALYZING FRAME" : response.title}</small><em>{scanning ? "79%" : "READY"}</em></div>
             <p>{scanning ? "Extracting objects and spatial context from the captured frame…" : response.text}</p>
+            {active === "map" && !scanning && <div className="mini-map" aria-label="Local navigation map"><i className="route route-a" /><i className="route route-b" /><i className="map-grid" /><b className="map-marker">●</b><span>N 42.6977<br />E 23.3219</span></div>}
             <div className="waveform" aria-hidden="true">{Array.from({ length: 24 }, (_, i) => <i key={i} style={{ height: `${7 + ((i * 13) % 22)}px` }} />)}</div>
           </div>
           <nav id="glasses-menu" className={`action-grid ${menuOpen ? "menu-visible" : ""}`} aria-label="Glasses menu" aria-hidden={!menuOpen}>

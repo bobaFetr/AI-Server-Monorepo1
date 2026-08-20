@@ -12,4 +12,4 @@ This vault describes a wearable AI-glasses system backed by a local Ubuntu AI se
 
 ## Current phase
 
-The repository is at the infrastructure-prototype stage. Health checks, diagnostics, API-key protection, rate limiting, and disabled-by-default restart/shutdown operations exist. Vision inference, PostgreSQL CRUD, device telemetry, real-time state, and the glasses UI are designs, not implementations yet.
+The repository is at the infrastructure and interface-prototype stage. The C# server has health checks, diagnostics, API-key protection, rate limiting, and disabled-by-default restart/shutdown operations. `GlassesUI/` contains an interactive React prototype with two lenses, an in-lens status display, a hamburger application menu, and a draggable targeting reticle. Vision inference, PostgreSQL CRUD, live device telemetry, real-time server integration, and physical glasses hardware are still designs rather than complete implementations.

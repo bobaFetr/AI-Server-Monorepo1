@@ -6,7 +6,7 @@ _Research and design snapshot: 2026-08-20_
 
 Build glasses that capture a scene and user input, pass them through a Python device agent to an ASP.NET Core server, and receive an answer from a local multimodal LLM. The glasses need a menu, battery and connection indicators, eye-gaze input, and safe offline/reconnect behavior. PostgreSQL stores devices, conversations, messages, telemetry, and image metadata.
 
-The .NET 10 prototype already has API/admin-key middleware, per-IP rate limits, health/readiness, diagnostics, guarded Linux power operations, a legacy text-command endpoint, and a dependency-free Python CLI. It does **not** yet have PostgreSQL/CRUD, device identities, image upload, LLM inference, job queues, telemetry, real-time events, conversations, or a glasses UI. Current readiness only checks key configuration, not the database/model/storage.
+The .NET 10 prototype already has API/admin-key middleware, per-IP rate limits, health/readiness, diagnostics, guarded Linux power operations, a legacy text-command endpoint, and a dependency-free Python CLI. `GlassesUI/` now provides an interactive React interface prototype with two lenses, lens-contained telemetry, a hamburger menu, and a spring-return targeting reticle. The UI currently uses simulated data and is not connected to hardware or the server. PostgreSQL/CRUD, device identities, image upload, LLM inference, job queues, live telemetry, real-time events, and conversations remain unimplemented. Current readiness only checks key configuration, not the database/model/storage.
 
 ## Recommended architecture
 
