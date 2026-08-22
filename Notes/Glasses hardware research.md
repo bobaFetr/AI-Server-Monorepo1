@@ -1,6 +1,6 @@
 # Glasses hardware research
 
-_Research snapshot: 2026-08-20_
+_Research snapshot: 2026-08-20; last audited: 2026-08-22_
 
 ## Recommendation
 
@@ -22,7 +22,7 @@ Putting a Linux computer, regulator, and large battery directly on the frame cre
 
 | Option | Good for | Problems | Decision |
 |---|---|---|---|
-| Raspberry Pi Zero 2 W | First portable prototype | Only 512 MB RAM, 2.4 GHz Wi-Fi, Linux boot time, still too large/ warm for elegant frames | **Recommended companion** |
+| Raspberry Pi Zero 2 W | First portable prototype | Only 512 MB RAM, 2.4 GHz Wi-Fi, Linux boot time, still too large/warm for elegant frames | **Recommended companion** |
 | Raspberry Pi Compute Module 5 | High-performance embedded prototype | Requires carrier board; much higher power and thermal load | Bench or pocket use only |
 | Phone companion | Later everyday prototype | Mobile integration and permissions are more complex | Strong phase-two option |
 | Custom MCU/SoC board | Final frame | Expensive and difficult before requirements are measured | Do not start here |
@@ -75,7 +75,7 @@ Do not add custom eye cameras in the first hardware milestone. Validate the UI w
 
 Start with one digital MEMS microphone near the bridge or one temple, isolated from fan/regulator noise. Move to two microphones only after measuring outdoor wind and speech quality; a two-mic array can support noise reduction and beamforming but needs spacing, matching, calibration, and DSP.
 
-Avoid copying old tutorials that specify the ICS-43434: its manufacturer now marks it end-of-life. A current candidate is the **TDK T5848**, a production I²S MEMS microphone with 24-bit output, a 3.5 × 2.65 × 0.98 mm package, and acoustic activity detection as low as 20 µA ([TDK T5848](https://www.invensense.tdk.com/en-us/products/microphone/t5848)). Its modes include approximately 310 µA high-quality, 120 µA low-power, and 9 µA sleep according to the datasheet ([T5848 datasheet](https://invensense.tdk.com/wp-content/uploads/2024/04/DS-000479-T5848-Datasheet-v1.0.pdf)).
+Avoid copying old tutorials that specify the ICS-43434: its manufacturer now marks it end-of-life. A current candidate is the **TDK T5848**, an I²S MEMS microphone with 20-bit digital output, a 3.5 × 2.65 × 0.98 mm package, and acoustic activity detection as low as 20 µA ([TDK T5848](https://www.invensense.tdk.com/en-us/products/microphone/t5848)). Its modes include approximately 310 µA high-quality, 120 µA low-power, and 9 µA sleep according to the datasheet ([T5848 datasheet](https://invensense.tdk.com/wp-content/uploads/2024/04/DS-000479-T5848-Datasheet-v1.0.pdf)).
 
 For the first prototype, use an evaluation/flex board rather than trying to hand-solder the bare MEMS package. Add:
 

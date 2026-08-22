@@ -1,6 +1,6 @@
 # Server and glasses security
 
-_Threat-model and hardening snapshot: 2026-08-21_
+_Threat-model and hardening snapshot: 2026-08-21; last audited: 2026-08-22_
 
 ## Security objective
 
@@ -85,7 +85,7 @@ The C# prototype already provides useful foundations:
 - EXIF, ICC, and XMP removal followed by re-encoding;
 - maximum 1,000-character prompt and UUID request ID validation;
 - bounded inference concurrency and Ollama timeout;
-- Ollama bound by default to loopback in configuration;
+- the C# Ollama client targets `127.0.0.1:11434` by default; this does not configure or enforce Ollama's own listening address;
 - server-side ARGUS proxy keeps the C# API key out of browser JavaScript;
 - logs use structured parameters instead of string-built commands.
 
@@ -189,7 +189,7 @@ OWASP specifically recommends maximum input and upload sizes to prevent unrestri
 
 ### 7. Image-decoder and file security
 
-The current ImageSharp decode/sanitize process is good, but image decoding remains an attack surface.
+The current ImageSharp decode/sanitize process is useful, but image decoding remains an attack surface. In particular, it bounds width and height but does not currently reject or bound animated/multi-frame WebP, so its decoded-memory ceiling is not established.
 
 - keep ImageSharp patched;
 - reject animated/multi-frame content unless required;

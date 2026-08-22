@@ -1,6 +1,6 @@
 # Minimum AI server hardware
 
-_Research and sizing snapshot: 2026-08-21_
+_Research and sizing snapshot: 2026-08-21; last audited: 2026-08-22_
 
 ## Decision
 
@@ -249,14 +249,14 @@ Upload-time lower-bound formula:
 time = file bits / effective link bits per second
 ```
 
-For a 5 MiB image:
+For a 5 MiB image, using decimal network rates (1 Mbit/s = 1,000,000 bit/s):
 
 ```text
-5 MiB × 8 = 40 Mib
+5 MiB × 8 = 40 Mib = 41.94304 Mbit
 
-at 10 Mbit/s effective throughput: 40 / 10 ≈ 4.0 seconds
-at 50 Mbit/s effective throughput: 40 / 50 ≈ 0.8 seconds
-at 100 Mbit/s effective throughput: 40 / 100 ≈ 0.4 seconds
+at 10 Mbit/s effective throughput: 41.94304 / 10 ≈ 4.19 seconds
+at 50 Mbit/s effective throughput: 41.94304 / 50 ≈ 0.84 seconds
+at 100 Mbit/s effective throughput: 41.94304 / 100 ≈ 0.42 seconds
 ```
 
 Protocol overhead and Wi-Fi contention make real time longer. A more typical 500 KiB capture is roughly one tenth of those transfer times. This supports resizing/compressing on the Python companion and sending event-triggered stills instead of continuous frames.

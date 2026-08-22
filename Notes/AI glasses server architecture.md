@@ -1,12 +1,12 @@
 # AI glasses server architecture
 
-_Research and design snapshot: 2026-08-20_
+_Research and design snapshot: 2026-08-20; last audited: 2026-08-22_
 
 ## Goal and current state
 
 Build glasses that capture a scene and user input, pass them through a Python device agent to an ASP.NET Core server, and receive an answer from a local multimodal LLM. The glasses need a menu, battery and connection indicators, eye-gaze input, and safe offline/reconnect behavior. PostgreSQL is planned to store devices, conversations, messages, telemetry, jobs, and image metadata.
 
-The .NET 10 prototype already has API/admin-key middleware, per-IP rate limits, health/readiness endpoints, diagnostics, guarded Linux power operations, a legacy text-command endpoint, validated JPEG/WebP upload, synchronous Ollama vision inference, and a dependency-free Python CLI. `GlassesUI/` provides an interactive React interface prototype with two lenses, lens-contained simulated telemetry, a hamburger menu, and a spring-return targeting reticle. Its server-side proxy can send a user-selected JPEG/WebP image to the C# vision endpoint when configured, but the UI is not connected to physical hardware or the Python device agent. PostgreSQL/CRUD, device identities, persistent job queues, live telemetry, SignalR events, and conversations remain unimplemented. Current readiness checks only API-key configuration, not the database, model, storage, or queue. The current liveness route is also protected by the standard API-key middleware, so a missing key produces `503` before the liveness handler runs; it is not yet a configuration-independent process probe.
+The .NET 10 prototype already has API/admin-key middleware, per-IP rate limits, health/readiness endpoints, diagnostics, guarded Linux power operations, a legacy text-command endpoint, validated JPEG/WebP upload, synchronous Ollama vision inference, and a dependency-free Python CLI. `GlassesUI/` provides an interactive React interface prototype with two lenses, lens-contained simulated telemetry, a hamburger menu, and a draggable/keyboard-controlled targeting reticle with an explicit center control. Its server-side proxy can send a user-selected JPEG/WebP image to the C# vision endpoint when configured, but the UI is not connected to physical hardware or the Python device agent. PostgreSQL/CRUD, device identities, persistent job queues, live telemetry, SignalR events, and conversations remain unimplemented. Current readiness checks only API-key configuration, not the database, model, storage, or queue. The current liveness route is also protected by the standard API-key middleware, so a missing key produces `503` before the liveness handler runs; it is not yet a configuration-independent process probe.
 
 ## Recommended architecture
 

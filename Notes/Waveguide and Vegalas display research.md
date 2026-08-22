@@ -1,6 +1,6 @@
 # Waveguide and Vegalas display research
 
-_Research snapshot: 2026-08-21_
+_Research snapshot: 2026-08-21; last audited: 2026-08-22_
 
 ## Purpose
 
@@ -241,4 +241,3 @@ Geometric reflective waveguides look particularly attractive for that final HUD 
 ## Decision
 
 Do not purchase or design around the 2022 Vegalas prototype announcement alone. Record it as evidence that a sub-1 cm³ RGB scanning light engine is physically plausible. For the next wearable prototype, buy or partner for a complete monocular optical module; for a later custom frame, prioritize an efficient reflective-waveguide HUD unless testing establishes a real need for wide-field diffractive AR.
-

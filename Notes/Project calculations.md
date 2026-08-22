@@ -1,6 +1,6 @@
 # Project calculations
 
-_Analysis snapshot: 2026-08-21_
+_Analysis snapshot: 2026-08-21; last audited: 2026-08-22_
 
 This note collects the important calculations and numeric limits in the AI-glasses project. Values labeled **illustrative** or **simulated** are not measurements and must not be used as final hardware specifications.
 
@@ -135,7 +135,7 @@ difference = 242,880 bytes
 
 The project should use one term consistently.
 
-### Maximum decoded image
+### Decoded-image memory for one frame
 
 The maximum configured dimensions are 1920×1080:
 
@@ -151,7 +151,7 @@ RGB  = 2,073,600 × 3 = 6,220,800 bytes ≈ 5.93 MiB
 RGBA = 2,073,600 × 4 = 8,294,400 bytes ≈ 7.91 MiB
 ```
 
-A compressed upload under 5 MiB can therefore occupy more memory after decoding. ImageSharp and the sanitized output add further temporary memory use.
+A compressed upload under 5 MiB can therefore occupy more memory after decoding. These figures cover one RGB/RGBA frame only; they are **not** a proven upper bound for the current endpoint. JPEG is single-frame, but WebP can be animated, and the current validator checks width and height without rejecting multiple frames or limiting total decoded frames. ImageSharp, additional frames, and the sanitized output can therefore require more temporary memory. Add an explicit single-frame check (or a total decoded-pixel/frame limit) before treating the calculation as a maximum-memory bound.
 
 ## Server capacity and timing
 
@@ -293,11 +293,11 @@ These are fixed demonstration values and have no statistical relationship to the
 
 ### Decorative code animation
 
-The Terminator display advances every 150 ms and contains 20 lines:
+The Terminator display advances every 150 ms and contains 21 lines:
 
 ```text
 line rate = 1000 / 150 = 6.67 lines/second
-full cycle = 20 × 150 ms = 3000 ms = 3 seconds
+full cycle = 21 × 150 ms = 3150 ms = 3.15 seconds
 ```
 
 ## Measurements still required
