@@ -129,7 +129,7 @@ This is the minimum tier I would test for the current project. Subject to a succ
 - short response history and modest image retention;
 - local development and diagnostics.
 
-GPU compatibility must be checked against current [Ollama hardware support](https://docs.ollama.com/gpu). At this snapshot, Ollama documents NVIDIA compute capability 5.0 or newer with driver 550 or newer, while compute capabilities 5.0–6.2 require driver 570 or newer. These requirements can change. NVIDIA is the conservative Linux choice for this prototype because support and diagnostic paths are generally clearer. A supported AMD platform may also work, but the exact device/runtime combination must be verified before purchase. Apple Metal is supported by Ollama, but Apple hardware is not an Ubuntu-server option and should be evaluated as a different deployment platform.
+GPU compatibility must be checked against current [Ollama hardware support](https://docs.ollama.com/gpu). At this snapshot, Ollama documents NVIDIA compute capability 5.0 or newer with driver 531 or newer. These requirements can change, and a listed GPU can still perform poorly for this workload. NVIDIA is the conservative Linux choice for this prototype because support and diagnostic paths are generally clearer. A supported AMD platform may also work, but the exact device/runtime combination must be verified before purchase. Apple Metal is supported by Ollama, but Apple hardware is not an Ubuntu-server option and should be evaluated as a different deployment platform.
 
 ### 3. Comfortable development server
 
@@ -317,7 +317,7 @@ Keep utilization well below 1; as it approaches 1, queue delay grows sharply. Th
 - SMART/health monitoring, temperature monitoring, and disk-space alerts;
 - regular database backups to another physical device.
 
-The current project targets .NET 10. The local validation used SDK `10.0.400-preview.0.26322.102`, so deployment should use a supported stable .NET 10 runtime/SDK build rather than relying on that development preview. If ARGUS is hosted on the same machine, Node/Vinext also consumes CPU and RAM; its production process must be included in measurement even though it is modest compared with Ollama.
+The current project targets .NET 10, and the current workspace reports stable SDK `10.0.400`. Deployment should use a supported .NET 10 runtime/SDK build and should not rely on an older preview build recorded during early validation. If ARGUS is hosted on the same machine, its Node-based server process also consumes CPU and RAM; include it in measurements even though it is modest compared with Ollama.
 
 ## Acceptance tests before calling the hardware sufficient
 

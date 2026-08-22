@@ -6,7 +6,7 @@ _Research and design snapshot: 2026-08-20_
 
 Build glasses that capture a scene and user input, pass them through a Python device agent to an ASP.NET Core server, and receive an answer from a local multimodal LLM. The glasses need a menu, battery and connection indicators, eye-gaze input, and safe offline/reconnect behavior. PostgreSQL is planned to store devices, conversations, messages, telemetry, jobs, and image metadata.
 
-The .NET 10 prototype already has API/admin-key middleware, per-IP rate limits, health/readiness, diagnostics, guarded Linux power operations, a legacy text-command endpoint, validated JPEG/WebP upload, synchronous Ollama vision inference, and a dependency-free Python CLI. `GlassesUI/` provides an interactive React interface prototype with two lenses, lens-contained simulated telemetry, a hamburger menu, and a spring-return targeting reticle. Its server-side proxy can send a user-selected JPEG/WebP image to the C# vision endpoint when configured, but the UI is not connected to physical hardware or the Python device agent. PostgreSQL/CRUD, device identities, persistent job queues, live telemetry, SignalR events, and conversations remain unimplemented. Current readiness only checks key configuration, not the database, model, storage, or queue.
+The .NET 10 prototype already has API/admin-key middleware, per-IP rate limits, health/readiness endpoints, diagnostics, guarded Linux power operations, a legacy text-command endpoint, validated JPEG/WebP upload, synchronous Ollama vision inference, and a dependency-free Python CLI. `GlassesUI/` provides an interactive React interface prototype with two lenses, lens-contained simulated telemetry, a hamburger menu, and a spring-return targeting reticle. Its server-side proxy can send a user-selected JPEG/WebP image to the C# vision endpoint when configured, but the UI is not connected to physical hardware or the Python device agent. PostgreSQL/CRUD, device identities, persistent job queues, live telemetry, SignalR events, and conversations remain unimplemented. Current readiness checks only API-key configuration, not the database, model, storage, or queue. The current liveness route is also protected by the standard API-key middleware, so a missing key produces `503` before the liveness handler runs; it is not yet a configuration-independent process probe.
 
 ## Recommended architecture
 
@@ -55,7 +55,7 @@ Send HTTPS `multipart/form-data` with:
 
 Do **not** use Base64 as the normal device protocol. Base64 encodes 3 bytes as 4 characters, approaching 33% size overhead before JSON overhead, and adds CPU/memory copies—bad for wearable bandwidth and battery. ASP.NET Core supports buffered multipart uploads for small files and streaming for larger ones ([Microsoft upload guidance](https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads?view=aspnetcore-10.0)).
 
-Starting limits: one JPEG/WebP, at most 1920×1080 and 5 MB, decoded-image validation, server-generated name, timeout, and per-device rate limit. Never trust filename, extension, or claimed MIME type. Strip EXIF unless intentionally needed.
+Starting limits: one JPEG/WebP, at most 1920×1080 and 5 MiB (5,242,880 bytes), decoded-image validation, server-generated name, timeout, and per-device rate limit. Never trust filename, extension, or claimed MIME type. Strip EXIF unless intentionally needed.
 
 ### C# to LLM: Base64 may be an adapter detail
 
@@ -141,7 +141,7 @@ Always show battery, connection, privacy/capture, and server/AI readiness. Menu:
 
 ## Health, security, and privacy
 
-- **Liveness:** API process responds; no dependencies.
+- **Liveness:** API process responds; no dependencies and no dependency on application credential configuration. Keep access narrowly exposed at the network layer if the route is unauthenticated.
 - **Readiness:** PostgreSQL reachable, model available, queue below limit, storage sufficient.
 - **Admin status:** model/load, queue, DB latency, GPU/CPU/RAM/disk, last inference.
 - **Device online:** heartbeat/connection state; distinct from server health.

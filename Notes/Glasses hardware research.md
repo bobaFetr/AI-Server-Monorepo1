@@ -29,7 +29,7 @@ Putting a Linux computer, regulator, and large battery directly on the frame cre
 
 The Zero 2 W is 65 × 30 mm and about 12 g, with a quad-core 1 GHz Cortex-A53, 512 MB RAM, 2.4 GHz Wi-Fi, Bluetooth 4.2/BLE, USB OTG, and one CSI-2 camera connector ([Raspberry Pi Zero 2 W](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/)). Its product brief specifies a 5 V input and sizes the recommended supply at up to 2.5 A; this is a supply ceiling, not the expected continuous draw ([Zero 2 W product brief](https://pip-assets.raspberrypi.com/categories/584-raspberry-pi-zero-2-w/documents/RP-008359-DS-1-raspberry-pi-zero-2-w-product-brief.pdf)).
 
-Compute Module 5 is 55 × 40 × 4.7 mm with a 2.4 GHz Cortex-A76 and 2–8 GB RAM, but it needs a custom carrier. The official IO board uses a 15–25 W supply configuration, illustrating why this class of compute does not belong on a glasses temple ([CM5 product brief](https://datasheets.raspberrypi.com/cm5/cm5-product-brief.pdf), [CM5 IO documentation](https://www.raspberrypi.com/documentation/computers/compute-module.html)).
+Compute Module 5 is 55 × 40 × 4.7 mm with a 2.4 GHz Cortex-A76 and current 2, 4, 8, or 16 GB RAM options, but it needs a custom carrier ([official CM5 product page](https://www.raspberrypi.com/products/compute-module-5/)). Raspberry Pi's development kit includes a 27 W USB-C supply, but that supply rating is not the module's measured power draw. The CM5's substantially higher compute and cooling requirements still make it a bench or pocket candidate rather than a sensible first choice for a glasses temple; measure the complete carrier, camera, display, and workload before sizing power or cooling.
 
 ### Proposed Pi configuration
 
