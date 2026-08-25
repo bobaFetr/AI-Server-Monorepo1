@@ -11,6 +11,7 @@ This vault describes a wearable AI-glasses system backed by a local Ubuntu AI se
 - [[Waveguide and Vegalas display research]] — analysis of miniature RGB laser engines, waveguide optics, display trade-offs, and the recommended ARGUS display path
 - [[Minimum AI server hardware]] — minimum and comfortable server specifications derived from the C#, PostgreSQL, Ollama vision, and glasses-to-Python data flow
 - [[Server and glasses security]] — threat model, current protections and gaps, device/server/database hardening, privacy, and security acceptance tests
+- [[Accessibility for blind and low-vision users]] — assessment of the project's potential as an audio-first scene assistant, current gaps, safety boundaries, and an accessible MVP
 - [[Project calculations]] — battery, image transport, server capacity, timing, heartbeat, and simulated UI calculations
 - `PythonClient/client.py` — current command-line client
 - `UbuntuServerOSVMCode-main/UbuntuServerOSVMCode-main/` — ASP.NET Core prototype
