@@ -7,6 +7,9 @@ import netlify from '@netlify/vite-plugin-tanstack-start'
 
 const config = defineConfig(({ command }) => ({
   server: { host: '127.0.0.1' },
+  // These packages contain native Node addons and must never be prebundled.
+  optimizeDeps: { exclude: ['ssh2', 'cpu-features'] },
+  ssr: { external: ['ssh2', 'cpu-features'] },
   plugins: [
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],

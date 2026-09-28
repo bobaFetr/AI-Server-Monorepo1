@@ -1,69 +1,62 @@
 # Northstar Server Console
 
-Northstar is a polished remote-server management interface designed for Ubuntu Server. It guides an administrator through entering SSH server coordinates, displays a clear 404-style recovery screen when a host cannot be reached, and opens a detailed operations dashboard after a successful connection.
+Local Ubuntu VM management through password-authenticated SSH.
 
-## Included Experience
+## Start locally
 
-- Server coordinate form for host, SSH port, username, and authentication method
-- Designed connecting, connected, and unreachable-host states
-- Overview with CPU, memory, disk, network, Docker, and activity information
-- Interactive terminal prototype
-- Docker container manager with start and stop controls
-- Task manager with process and resource data
-- Navigation for files, firewall, storage, users and groups, updates, and settings
-- Responsive desktop, tablet, and mobile layouts
-
-## Technology
-
-- TanStack Start
-- React 19
-- TypeScript
-- Vite
-- Tailwind CSS 4 tooling with a custom CSS design system
-- Lucide React icons
-- Netlify deployment adapter
-
-## Run Locally
-
-```bash
-npm install
-npm run dev
+```powershell
+npm.cmd install
+npm.cmd run dev
 ```
 
-The development server runs on the port configured by the project. For Netlify platform emulation, use Netlify CLI with the project configuration.
+Open http://127.0.0.1:3000. Enter the VM host, SSH port, Ubuntu username,
+and that user's password. The dashboard opens only after the VM accepts the
+password and the overview command succeeds. Incorrect credentials fail the connection.
+There is no SSH-key fallback or simulated connection mode.
 
-## Prototype Behavior
+## Prepare the VM
 
-## Connect to a local Ubuntu VM
+1. Install OpenSSH in Ubuntu: `sudo apt install openssh-server`.
+2. Ensure SSH password authentication is enabled for your Ubuntu user. Accounts
+   requiring keyboard-interactive/MFA authentication are not supported by this version.
+3. Use the VM's reachable host-only/bridged IP and port 22, or configure NAT forwarding
+   from host `127.0.0.1:2222` to guest port `22`.
+4. Connect once from PowerShell with `ssh -p 2222 ubuntu@127.0.0.1`, replacing the
+   coordinates as needed. Verify the host fingerprint against the VM console before
+   accepting it. `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub` shows the VM's
+   ED25519 fingerprint. Northstar verifies host keys against this Windows user's
+   default `~/.ssh/known_hosts`, using the installed OpenSSH `ssh-keygen` command.
+5. Enter those same coordinates and the Ubuntu user's password in Northstar.
 
-Run `npm install` and `npm run dev`, then open `http://127.0.0.1:3000`.
-On Windows PowerShell, use `npm.cmd` if execution policy blocks `npm.ps1`.
-Real SSH mode is the default; Demo mode explicitly enables the original simulated dashboard.
+## Live tools
 
-The local backend invokes this PC's OpenSSH client. Private keys never enter the browser.
-Password prompts are not supported: configure an SSH key or SSH agent first.
+System overview, processes, storage, running services, journal, Docker listing,
+and confirmed container start/stop/restart by ID. The Processes view refreshes continuously using one-second top CPU samples plus SSH connection time; other views refresh on demand. Process updates can be paused, stop when you leave the view, and stop on errors until you resume.
+Docker operations require existing Docker permissions for the Ubuntu user.
+Northstar does not invoke sudo. Interactive terminal, file editing, firewall changes,
+user administration, and package installation are not implemented.
 
-1. In Ubuntu, install OpenSSH with `sudo apt install openssh-server`.
-2. Make the VM reachable: use a host-only/bridged address, or configure your hypervisor's NAT forwarding from `127.0.0.1:2222` to guest port `22`.
-3. On Windows, generate a key if you do not already have one: `ssh-keygen -t ed25519`. Do not overwrite an existing key. Install the contents of the `.pub` file in the Ubuntu user's `~/.ssh/authorized_keys` (directory mode `700`, file mode `600`). Keep the private key on Windows. For a passphrase-protected key, load it into your Windows SSH agent with `ssh-add`.
-4. Connect once from PowerShell: `ssh -p 2222 ubuntu@127.0.0.1` (replace port, username, and host). Verify the displayed host fingerprint against the VM console before accepting it. In the VM, `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub` shows the ED25519 fingerprint.
-5. Verify noninteractive access: `ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -p 2222 ubuntu@127.0.0.1 hostname`.
-6. Enter the same host, port, and Ubuntu username in Northstar and click Connect.
+## Password handling and local scope
 
-Live tools: system overview, processes, storage, running services, journal, Docker listing,
-and confirmed container start/stop/restart by container ID. Results refresh on demand.
-Docker operations require existing Docker permissions for the SSH user; Northstar does not
-grant permissions or invoke sudo. Interactive terminal, file editing, firewall changes,
-user administration, and updates remain available only as demo screens, not live actions.
+The password travels to the loopback backend in a POST request and is used by the
+SSH library over the encrypted SSH connection. It is never placed in command-line
+arguments, written to files, logged, or saved to browser storage by the app. It remains
+in browser memory while connected so later operations can authenticate, and is cleared
+on a failed connection or Disconnect. Each operation reauthenticates with the supplied
+password. Reloading the page requires signing in again.
 
-The gateway is restricted to same-origin requests on the loopback development server and is
-disabled in production builds. Do not expose the dev server using a tunnel or reverse proxy.
-Commands are allowlisted, arguments validated, host-key verification is required, and
-operations have a 20-second deadline. Each operation opens a new SSH process; Disconnect
-returns to the form. No SSH credentials are stored by Northstar.
+The gateway accepts same-origin requests on the loopback development server only;
+production builds disable remote management. Do not expose the development server
+through a tunnel or reverse proxy. Commands are allowlisted and have time/output limits.
 
-## Original demo
+## Checks
 
-With Demo mode selected, a normal host value opens the simulated dashboard. Entering a host that contains `offline`, `invalid`, `fail`, or `404` opens the demonstration connection error experience.
+```powershell
+node --experimental-strip-types --test tests/ssh-input.test.mjs tests/password-ssh.test.mjs
+node node_modules/typescript/bin/tsc --noEmit
+npm.cmd run build
+```
 
-A production implementation should connect through an authenticated server-side gateway or installed host agent. SSH credentials and private keys should never be exposed to browser code.
+The SSH integration test starts a temporary loopback SSH server and verifies correct
+passwords, rejected passwords/users, rejected host keys, and no key/agent fallback.
+It does not test your actual VM.
