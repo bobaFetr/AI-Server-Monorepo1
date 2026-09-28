@@ -1,3 +1,5 @@
+import { LiveDashboard } from '../components/LiveDashboard'
+import { runSsh } from '../server/ssh.functions'
 import { createFileRoute } from '@tanstack/react-router'
 import { FormEvent, useMemo, useState } from 'react'
 import {
@@ -98,14 +100,33 @@ function ServerManager() {
   const [username, setUsername] = useState('ubuntu')
   const [activeView, setActiveView] = useState<DashboardView>('Overview')
 
-  const connect = (event: FormEvent<HTMLFormElement>) => {
+  const [demo, setDemo] = useState(false)
+  const [liveOutput, setLiveOutput] = useState('')
+  const [connectionError, setConnectionError] = useState('')
+
+  const connect = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setConnectionState('connecting')
+    setConnectionError('')
+    if (!demo) {
+      try {
+        const result = await runSsh({ data: { host: host.trim(), port, username: username.trim(), operation: 'overview' } })
+        if (!result.ok) throw new Error(result.output)
+        setLiveOutput(result.output)
+        setConnectionState('connected')
+      } catch (error) {
+        setConnectionError(error instanceof Error ? error.message : 'Connection failed.')
+        setConnectionState('idle')
+      }
+      return
+    }
     window.setTimeout(() => {
       const shouldFail = /404|offline|invalid|fail/i.test(host)
       setConnectionState(shouldFail ? 'error' : 'connected')
     }, 1100)
   }
+
+  if (connectionState === 'connected' && !demo) return <LiveDashboard coordinates={{ host: host.trim(), port, username: username.trim() }} initialOutput={liveOutput} disconnect={() => setConnectionState('idle')} />
 
   if (connectionState === 'connected') {
     return (
@@ -124,6 +145,9 @@ function ServerManager() {
 
   return (
     <ConnectionScreen
+      demo={demo}
+      setDemo={setDemo}
+      connectionError={connectionError}
       connectionState={connectionState}
       host={host}
       port={port}
@@ -149,6 +173,7 @@ function Brand() {
 }
 
 function ConnectionScreen({
+  demo, setDemo, connectionError,
   connectionState,
   host,
   port,
@@ -158,6 +183,9 @@ function ConnectionScreen({
   setUsername,
   connect,
 }: {
+  demo: boolean
+  setDemo: (value: boolean) => void
+  connectionError: string
   connectionState: ConnectionState
   host: string
   port: string
@@ -174,7 +202,7 @@ function ConnectionScreen({
       <div className="grid-texture" />
       <header className="connection-header">
         <Brand />
-        <div className="secure-label"><LockKeyhole size={14} /> End-to-end encrypted</div>
+        <div className="secure-label"><LockKeyhole size={14} /> Local SSH gateway</div>
       </header>
 
       <section className="connection-layout">
@@ -184,7 +212,7 @@ function ConnectionScreen({
           <p>Connect to an Ubuntu host and manage its entire stack from one focused workspace.</p>
           <div className="trust-row">
             <div><ShieldCheck size={18} /><span><strong>SSH tunnel</strong>Encrypted session</span></div>
-            <div><Clock3 size={18} /><span><strong>Zero storage</strong>Credentials stay local</span></div>
+            <div><Clock3 size={18} /><span><strong>Local keys</strong>Keys stay on this PC</span></div>
           </div>
         </div>
 
@@ -201,29 +229,31 @@ function ConnectionScreen({
           <label className="field-label" htmlFor="host">Host address</label>
           <div className="input-shell">
             <Network size={17} />
-            <input id="host" value={host} onChange={(event) => setHost(event.target.value)} placeholder="server.example.com" required />
+            <input disabled={isConnecting} id="host" value={host} onChange={(event) => setHost(event.target.value)} placeholder="server.example.com" required />
           </div>
 
           <div className="field-pair">
             <div>
               <label className="field-label" htmlFor="port">SSH port</label>
-              <div className="input-shell compact"><span className="port-symbol">:</span><input id="port" value={port} onChange={(event) => setPort(event.target.value)} inputMode="numeric" required /></div>
+              <div className="input-shell compact"><span className="port-symbol">:</span><input disabled={isConnecting} id="port" value={port} onChange={(event) => setPort(event.target.value)} inputMode="numeric" required /></div>
             </div>
             <div>
               <label className="field-label" htmlFor="username">Username</label>
-              <div className="input-shell compact"><UserRoundCog size={17} /><input id="username" value={username} onChange={(event) => setUsername(event.target.value)} required /></div>
+              <div className="input-shell compact"><UserRoundCog size={17} /><input disabled={isConnecting} id="username" value={username} onChange={(event) => setUsername(event.target.value)} required /></div>
             </div>
           </div>
 
           <div className="auth-row">
-            <div><KeyRound size={17} /><span><strong>SSH key</strong>Recommended</span></div>
+            <div><KeyRound size={17} /><span><strong>SSH key / agent</strong>Uses this PC?s OpenSSH credentials</span></div>
             <ChevronDown size={17} />
           </div>
 
           <button className="connect-button" type="submit" disabled={isConnecting}>
             {isConnecting ? <><RefreshCw className="spin" size={18} /> Negotiating secure session</> : <>Connect to server <Zap size={18} fill="currentColor" /></>}
           </button>
-          <p className="connection-hint">Use <code>offline.local</code> to preview the connection error.</p>
+          <label className="connection-hint"><input type="checkbox" checked={demo} disabled={isConnecting} onChange={event => setDemo(event.target.checked)} /> Demo mode (simulated data)</label>
+          {connectionError && <p className="live-error" role="alert">{connectionError}</p>}
+          <p className="connection-hint">First set up SSH key access and verify the VM host key from PowerShell. For NAT port forwarding, use 127.0.0.1 and your forwarded port (for example 2222).</p>
         </form>
       </section>
       <footer className="connection-footer"><span>Northstar Console v2.4</span><span>Designed for Ubuntu Server 22.04+</span></footer>
