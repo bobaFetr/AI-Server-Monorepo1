@@ -40,7 +40,7 @@ export function LiveDashboard({ coordinates, initialOutput, disconnect }: { coor
       {notice && <p role="status">{notice}</p>}
       {view === 'processes' ? <ProcessMonitor coordinates={coordinates} /> : <section className="panel"><div className="panel-header"><h2>{views[view]}</h2><span>{busy ? 'Loading…' : updated ? `Last successful update: ${updated}` : 'Not loaded yet'}</span></div><pre className="live-output" aria-busy={busy}>{output || (busy ? 'Reading server…' : 'No data available.')}</pre></section>}
       {view === 'containers' && <section className="panel live-controls"><label htmlFor="container-id">Container ID from the list above</label><div className="input-shell"><input disabled={busy} id="container-id" value={container} onChange={e => setContainer(e.target.value.trim())} placeholder="12-character container ID" /></div><div className="live-tabs">{(['start', 'stop', 'restart'] as const).map(action => <button key={action} className="period-button" disabled={busy || !/^[a-f0-9]{12,64}$/.test(container)} onClick={() => void run(action)}>{action}</button>)}</div><p>Your Ubuntu user must already have permission to access Docker.</p></section>}
-      <p className="connection-hint">Processes update automatically using one-second CPU samples plus connection time. Other views refresh on demand. Each operation opens a short SSH connection. Interactive shell, file editing, firewall changes, and package installation are not enabled.</p>
+      <p className="connection-hint">Processes stream through one SSH connection at the selected sampling interval. Other views refresh on demand. Interactive shell, file editing, firewall changes, and package installation are not enabled.</p>
     </section>
   </main>
 }

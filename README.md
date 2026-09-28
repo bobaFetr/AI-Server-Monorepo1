@@ -31,7 +31,7 @@ There is no SSH-key fallback or simulated connection mode.
 ## Live tools
 
 System overview, processes, storage, running services, journal, Docker listing,
-and confirmed container start/stop/restart by ID. The Processes view refreshes continuously using one-second top CPU samples plus SSH connection time; other views refresh on demand. Process updates can be paused, stop when you leave the view, and stop on errors until you resume.
+and confirmed container start/stop/restart by ID. The Processes view streams completed top CPU samples (3 seconds by default; selectable 1, 2, 3, or 5 seconds) over a single authenticated SSH connection; other views refresh on demand. Process updates can be paused, stop when you leave the view, and stop on errors until you resume.
 Docker operations require existing Docker permissions for the Ubuntu user.
 Northstar does not invoke sudo. Interactive terminal, file editing, firewall changes,
 user administration, and package installation are not implemented.
@@ -42,8 +42,7 @@ The password travels to the loopback backend in a POST request and is used by th
 SSH library over the encrypted SSH connection. It is never placed in command-line
 arguments, written to files, logged, or saved to browser storage by the app. It remains
 in browser memory while connected so later operations can authenticate, and is cleared
-on a failed connection or Disconnect. Each operation reauthenticates with the supplied
-password. Reloading the page requires signing in again.
+on a failed connection or Disconnect. Each one-off operation reauthenticates with the supplied password. The process monitor authenticates once and keeps SSH open until paused or disconnected. Reloading the page requires signing in again.
 
 The gateway accepts same-origin requests on the loopback development server only;
 production builds disable remote management. Do not expose the development server
