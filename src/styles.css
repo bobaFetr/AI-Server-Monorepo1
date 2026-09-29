@@ -219,3 +219,32 @@ code { font-family: 'IBM Plex Mono', monospace; }
 .live-controls { padding: 24px; margin-top: 20px; }
 .live-controls .input-shell { max-width: 400px; margin-top: 10px; }
 button:disabled { opacity: .6; cursor: wait; }
+
+.ssh-terminal-panel { min-width: 0; }
+.ssh-terminal-panel .panel-header { flex-wrap: wrap; gap: 12px; }
+.ssh-terminal-panel h2 { display: flex; align-items: center; gap: 8px; }
+.ssh-terminal-screen { height: clamp(320px, 60vh, 720px); padding: 12px; background: #181c1b; overflow: hidden; }
+.ssh-terminal-screen .xterm { height: 100%; }
+.terminal-shortcuts { padding: 0 16px; }
+.ssh-terminal-panel > .connection-hint { padding: 0 16px 16px; }
+
+.file-explorer { min-width: 0; }
+.file-explorer h2 { display: flex; align-items: center; gap: 8px; }
+.file-navigation, .file-pagination, .file-breadcrumbs, .file-preview { padding: 0 20px; }
+.file-navigation .live-tabs { margin-top: 0; }
+.file-filter { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin: 16px 0; }
+.file-filter .input-shell { flex: 1; min-width: 200px; }
+.file-filter label { font-size: 12px; }
+.file-breadcrumbs { display: flex; flex-wrap: wrap; margin: 15px 0; gap: 4px; }
+.file-breadcrumbs button { border: 0; background: transparent; color: var(--green); cursor: pointer; overflow-wrap: anywhere; }
+.file-table-wrap { overflow-x: auto; }
+.file-table { border-collapse: collapse; width: 100%; text-align: left; font-size: 12px; }
+.file-table th, .file-table td { padding: 12px 16px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.file-table th { color: var(--ink-soft); font-weight: 600; }
+.file-table td:first-child button { display: flex; align-items: center; gap: 9px; border: 0; background: none; color: var(--ink); cursor: pointer; text-align: left; }
+.file-table td:first-child span { max-width: 360px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.file-pagination { align-items: center; }
+.file-preview h3 { overflow-wrap: anywhere; font-size: 14px; }
+.file-preview pre { overflow: auto; max-height: 480px; padding: 16px; background: var(--paper); font: 12px/1.6 'IBM Plex Mono', monospace; }
+.file-preview p, .file-empty { padding: 16px; color: var(--ink-soft); }
+.file-explorer > .connection-hint { padding: 0 16px 20px; }

@@ -33,12 +33,42 @@ There is no SSH-key fallback or simulated connection mode.
 System overview, processes, storage, running services, journal, Docker listing,
 and confirmed container start/stop/restart by ID. The Processes view streams completed top CPU samples (3 seconds by default; selectable 1, 2, 3, or 5 seconds) over a single authenticated SSH connection; other views refresh on demand. Process updates can be paused, stop when you leave the view, and stop on errors until you resume.
 Docker operations require existing Docker permissions for the Ubuntu user.
-Northstar does not invoke sudo. Interactive terminal, file editing, firewall changes,
-user administration, and package installation are not implemented.
+Dashboard actions do not invoke sudo. Dedicated file editing, firewall, user, and package-management views are not implemented.
+
+## File Explorer
+
+Open **File Explorer** after connecting to browse the VM through SFTP. Start at `/`,
+use **Home** for the SSH user's home directory, click folders/breadcrumbs, or enter
+an absolute Linux path. Hidden files are shown by default. Directory entries show
+size, modification time, numeric permissions, and owner UID/GID. Listings are paged
+in groups of 200; filtering applies to the current page. Refresh after directory changes.
+
+Click a regular file for a read-only UTF-8 preview (first 64 KB). Binary files show
+metadata instead of text. Symbolic links resolve to their target; devices, sockets,
+and other special files are not opened. The browser does not modify server files.
+Access uses the logged-in user's Linux permissions; protected directories such as
+`/root` may be denied. The VM must have the SFTP subsystem enabled in OpenSSH.
+
+## Interactive Ubuntu terminal
+
+After connecting, open **Terminal**. This opens a real SSH shell with a pseudo-terminal
+on the VM as your logged-in Ubuntu user. Commands, current directory, history,
+Ctrl+C, Tab completion, sudo password prompts, and interactive programs such as
+`top` and `nano` use the remote shell. It is independent of the VM console session.
+The terminal resizes with the browser. Leaving Terminal, Disconnect, or closing
+the page closes the SSH shell; background jobs explicitly detached on Linux may
+continue. Use Reconnect after exiting a shell.
+
+Restart `npm.cmd run dev` after installing this update so the local WebSocket
+endpoint is registered. Terminal access is available only in local development.
+The shell uses your Ubuntu account permissions, including any sudo access you
+invoke. Unlike dashboard buttons, commands typed here are unrestricted shell input.
+No terminal commands, output, or passwords are logged or persisted by Northstar;
+the remote shell may write its normal Linux history.
 
 ## Password handling and local scope
 
-The password travels to the loopback backend in a POST request and is used by the
+The password travels to the loopback backend in a POST request (or the first terminal WebSocket message) and is used by the
 SSH library over the encrypted SSH connection. It is never placed in command-line
 arguments, written to files, logged, or saved to browser storage by the app. It remains
 in browser memory while connected so later operations can authenticate, and is cleared
@@ -46,12 +76,12 @@ on a failed connection or Disconnect. Each one-off operation reauthenticates wit
 
 The gateway accepts same-origin requests on the loopback development server only;
 production builds disable remote management. Do not expose the development server
-through a tunnel or reverse proxy. Commands are allowlisted and have time/output limits.
+through a tunnel or reverse proxy. Dashboard commands are allowlisted and have time/output limits. The explicitly opened terminal supports interactive shell input through a same-origin WebSocket restricted to loopback peers, with SSH password and host-key verification.
 
 ## Checks
 
 ```powershell
-node --experimental-strip-types --test tests/ssh-input.test.mjs tests/password-ssh.test.mjs
+node --experimental-strip-types --test tests/*.test.mjs
 node node_modules/typescript/bin/tsc --noEmit
 npm.cmd run build
 ```
