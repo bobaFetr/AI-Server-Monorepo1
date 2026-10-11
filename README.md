@@ -131,6 +131,21 @@ through a tunnel or reverse proxy. Dashboard commands are allowlisted and have t
 
 ## Checks
 
+Overview includes a Baobab-style disk usage analyzer with two interactive rings,
+a size-sorted entry table, Root/Home/Up navigation, and an absolute-path scanner.
+The inner ring shows immediate entries and the outer ring shows their contents.
+Data comes from GNU `du -a -x -B1 --max-depth=2 --null`; filesystem capacity comes
+from `df -B1`. Sizes are allocated blocks, not apparent file lengths. Scans remain
+on one filesystem, count hard links once, and do not follow symlinks inside the
+selected folder. Selecting a symlink path resolves its target before scanning.
+There is no sudo elevation. Permission failures, changes during scanning, and the
+45-second scan limit are labelled as partial results. Interrupted records are
+discarded while complete records are preserved. The SSH deadline for this read-only
+scan is 60 seconds; other operations retain their existing 20-second deadline.
+Filesystem used space is separate from scanned sizes and can include metadata,
+unreadable files, or deleted files still held open. Refresh rescans Overview;
+other dashboard views keep their existing behavior.
+
 ```powershell
 node --experimental-strip-types --test tests/*.test.mjs
 node node_modules/typescript/bin/tsc --noEmit

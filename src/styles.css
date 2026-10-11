@@ -1,6 +1,34 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss" source("../");
 
+.disk-analyzer { margin-bottom: 20px; }
+.disk-body { padding: 20px; }
+.disk-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.disk-path { flex: 1; min-width: 180px; }
+.disk-capacity { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 22px 0 12px; }
+.disk-capacity span { display: block; color: var(--ink-soft); font-size: 11px; text-transform: capitalize; }
+.disk-capacity strong { display: block; margin-top: 5px; font: 500 22px 'IBM Plex Mono', monospace; }
+.disk-capacity-bar { height: 8px; display: flex; background: var(--line); overflow: hidden; }
+.disk-capacity-bar span:first-child { background: var(--orange); }
+.disk-capacity-bar span:last-child { background: var(--green); }
+.disk-layout { display: grid; grid-template-columns: minmax(260px, 440px) minmax(0, 1fr); gap: 28px; align-items: center; margin-top: 20px; }
+.disk-chart { width: 100%; display: block; }
+.disk-chart path { cursor: pointer; transition: fill-opacity .15s; }
+.disk-chart path:hover, .disk-chart path:focus { fill-opacity: 1; stroke: var(--ink); stroke-width: 3; outline: none; }
+.disk-center-size { fill: var(--ink); font: 500 21px 'IBM Plex Mono', monospace; pointer-events: none; }
+.disk-center-label { fill: var(--ink-soft); font: 11px 'IBM Plex Mono', monospace; pointer-events: none; }
+.disk-selection { text-align: center; overflow-wrap: anywhere; font: 12px 'IBM Plex Mono', monospace; }
+.disk-table-wrap { max-height: 430px; overflow: auto; }
+.disk-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.disk-table caption { text-align: left; padding: 12px 0; color: var(--ink-soft); overflow-wrap: anywhere; }
+.disk-table th { text-align: left; color: var(--ink-soft); background: var(--panel); position: sticky; top: 0; }
+.disk-table th, .disk-table td { padding: 12px 8px; border-bottom: 1px solid var(--line); }
+.disk-table td:not(:first-child) { white-space: nowrap; font-family: 'IBM Plex Mono', monospace; }
+.disk-table button { border: 0; background: none; cursor: pointer; text-align: left; overflow-wrap: anywhere; display: flex; align-items: center; gap: 9px; }
+.disk-table button:hover { color: var(--orange); }
+.disk-swatch { width: 9px; height: 9px; flex-shrink: 0; }
+@media (max-width: 760px) { .disk-layout { grid-template-columns: minmax(0, 1fr); } .disk-chart-wrap { max-width: 420px; width: 100%; margin: auto; } .disk-capacity strong { font-size: 16px; } .disk-body { padding: 12px; } }
+
 :root {
   --ink: #17201d;
   --ink-soft: #5d6964;

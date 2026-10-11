@@ -2,7 +2,7 @@ import { Client } from 'ssh2'
 import { StringDecoder } from 'node:string_decoder'
 
 type Credentials = { host: string; port: string; username: string; password: string }
-export function passwordSsh(data: Credentials, command: string, trustedKeys: string[]): Promise<{ ok: boolean; output: string }> {
+export function passwordSsh(data: Credentials, command: string, trustedKeys: string[], timeoutMs = 20000): Promise<{ ok: boolean; output: string }> {
   return new Promise(resolve => {
     const client = new Client()
     let done = false
@@ -14,7 +14,7 @@ export function passwordSsh(data: Credentials, command: string, trustedKeys: str
       client.destroy()
       resolve({ ok, output })
     }
-    const timer = setTimeout(() => finish(false, 'SSH timed out. A remote action may have completed; refresh before retrying.'), 20000)
+    const timer = setTimeout(() => finish(false, 'SSH timed out. A remote action may have completed; refresh before retrying.'), timeoutMs)
     client.on('error', (error: Error & { level?: string }) => {
       finish(false, untrusted ? 'The VM host key is not trusted or has changed. Verify it from PowerShell before connecting.' : error.level === 'client-authentication' ? 'Authentication failed. Ubuntu rejected the username/password, or SSH password authentication is disabled.' : 'SSH connection failed. Check the VM address, port, and SSH service.')
     })

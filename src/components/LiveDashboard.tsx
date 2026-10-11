@@ -5,6 +5,7 @@ import { runSsh } from '../server/ssh.functions'
 import { type Coordinates, type Operation } from '../server/ssh-input'
 import { ProcessMonitor } from './ProcessMonitor'
 import { SshTerminal } from './SshTerminal'
+import { DiskUsageAnalyzer } from './DiskUsageAnalyzer'
 
 const views = { overview: 'Overview', terminal: 'Terminal', files: 'File Explorer', programs: 'Programs', processes: 'Processes', containers: 'Containers', storage: 'Storage', services: 'Services', journal: 'System journal' } as const
 
@@ -16,6 +17,7 @@ export function LiveDashboard({ coordinates, initialOutput, disconnect }: { coor
   const [updated, setUpdated] = useState<string | null>(() => new Date().toLocaleTimeString())
   const [container, setContainer] = useState('')
   const [notice, setNotice] = useState('')
+  const [overviewRefresh, setOverviewRefresh] = useState(0)
   async function run(operation: Operation) {
     if (busy) return
     if (['start', 'stop', 'restart'].includes(operation) && !window.confirm(`${operation} container ${container} on ${coordinates.host}?`)) return
@@ -30,6 +32,7 @@ export function LiveDashboard({ coordinates, initialOutput, disconnect }: { coor
         setOutput(refreshed.output)
       } else setOutput(result.output)
       setUpdated(new Date().toLocaleTimeString())
+      if (operation === 'overview') setOverviewRefresh(value => value + 1)
     } catch (e) { setError(e instanceof Error ? e.message : 'Request failed.') }
     finally { setBusy(false) }
   }
@@ -40,6 +43,7 @@ export function LiveDashboard({ coordinates, initialOutput, disconnect }: { coor
       <nav className="live-tabs" aria-label="Live server tools">{Object.entries(views).map(([id, label]) => <button className={view === id ? 'primary-action' : 'period-button'} disabled={busy} aria-current={view === id ? 'page' : undefined} key={id} onClick={() => { if (id === view) return; setView(id as keyof typeof views); setOutput(''); setUpdated(null); setError(''); setNotice(''); if (id !== 'processes' && id !== 'terminal' && id !== 'files') void run(id as Exclude<keyof typeof views, 'terminal' | 'files'>) }}>{label}</button>)}</nav>
       {error && <p role="alert" className="live-error">{error} Previous results may be stale.</p>}
       {notice && <p role="status">{notice}</p>}
+      {view === 'overview' && <DiskUsageAnalyzer coordinates={coordinates} refreshKey={overviewRefresh} />}
       {view === 'programs' && <p className="connection-hint">Installed APT/DPKG packages include applications, libraries, and system tools. Snap and Flatpak packages are included when available. Manually copied programs and software installed through language-specific package managers are not included. Use Refresh to update the list.</p>}
       {view === 'files' ? <FileExplorer coordinates={coordinates} /> : view === 'terminal' ? <SshTerminal coordinates={coordinates} /> : view === 'processes' ? <ProcessMonitor coordinates={coordinates} /> : <section className="panel"><div className="panel-header"><h2>{views[view]}</h2><span>{busy ? 'Loading…' : updated ? `Last successful update: ${updated}` : 'Not loaded yet'}</span></div><pre className="live-output" aria-busy={busy}>{output || (busy ? 'Reading server…' : 'No data available.')}</pre></section>}
       {view === 'containers' && <section className="panel live-controls"><label htmlFor="container-id">Container ID from the list above</label><div className="input-shell"><input disabled={busy} id="container-id" value={container} onChange={e => setContainer(e.target.value.trim())} placeholder="12-character container ID" /></div><div className="live-tabs">{(['start', 'stop', 'restart'] as const).map(action => <button key={action} className="period-button" disabled={busy || !/^[a-f0-9]{12,64}$/.test(container)} onClick={() => void run(action)}>{action}</button>)}</div><p>Your Ubuntu user must already have permission to access Docker.</p></section>}

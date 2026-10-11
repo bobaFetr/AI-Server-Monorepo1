@@ -126,3 +126,19 @@ the user has subsequently sourced the new config. To apply it deterministically 
 that existing console, run `source ~/.bashrc; _northstar_history_sync; history` there.
 Configuration files and SSH sessions cannot directly update another already-running
 Bash process's in-memory history or prompt hooks.
+
+# Overview disk analyzer verification
+
+Read-only tests through the actual local server-function endpoint succeeded for
+`/`, the SSH user's home directory, `/etc`, and `/etc/os-release` (resolved regular
+file). The complete root traversal returned 17 immediate entries in about 14.4
+seconds, with permission restrictions correctly marked partial rather than hidden.
+Home returned 23 entries without a partial flag. Filesystem capacity was about
+42.76 GB total and 10.73 GB used (decimal bytes); the UI formats binary units.
+An intentionally short two-second read-only scan reproduced GNU du being killed
+mid-record. The parser now preserves complete records and rejects/discards the
+unfinished suffix appropriately. Regression tests cover this, hierarchy, filenames
+containing tabs/newlines, shell quoting, malformed paths/sizes and ring geometry.
+TypeScript, all 48 automated tests, and production build passed. Browser visual
+inspection was unavailable in this session; responsive styles and accessibility
+controls were implemented but are not claimed to have been visually verified.
