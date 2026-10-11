@@ -95,3 +95,34 @@ The revised freshness calculation reported no delay before or after these update
 Tests cover regular slower 1-second arrivals, old frames, interrupted streams, delay
 field validation, and all four configured intervals. All 42 automated tests, TypeScript,
 and production build passed. Browser rendering remains unverified.
+
+## Shared Bash history
+
+Configured shared history for the supplied Linux user's Bash sessions as requested.
+Installed the repository script at ~/.config/northstar/history-sync.bash and sourced
+it from ~/.bashrc. Existing finite default history limits were changed to unlimited;
+duplicate and leading-space commands are retained. Existing prompt hooks are preserved.
+
+Backups on the server:
+
+- /home/vboxuser/.bashrc.northstar-backup.U3ZQ3v
+- /home/vboxuser/.bash_history.northstar-backup.MNNOVm
+
+A real Northstar WebSocket terminal and a separate SSH Bash PTY were open together.
+Verified existing saved history appears in Northstar, a Northstar command appears in
+the other session, and a command from the other session appears in Northstar after
+refreshing its prompt. The old history file remained an unchanged prefix of the updated
+file. Only benign printf/history diagnostic commands were added for this check.
+
+Already-open terminals must run source ~/.bashrc once or reconnect. At an idle prompt,
+Enter imports the other session's newly saved commands. This shares history for the
+same user and Bash; other accounts and shells are separate. Previously discarded or
+unsaved commands cannot be retroactively recovered from the saved file.
+
+Follow-up VirtualBox console inspection: the console is vboxuser's Bash on tty1,
+started at 14:34 on the server. The current .profile sources .bashrc, and .bashrc
+sources the shared-history script. The process start time does not establish whether
+the user has subsequently sourced the new config. To apply it deterministically in
+that existing console, run `source ~/.bashrc; _northstar_history_sync; history` there.
+Configuration files and SSH sessions cannot directly update another already-running
+Bash process's in-memory history or prompt hooks.

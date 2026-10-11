@@ -93,6 +93,7 @@ export function SshTerminal({ coordinates }: { coordinates: Coordinates }) {
     {error && <p className="live-error" role="alert">{error}</p>}
     <div ref={element} className="ssh-terminal-screen" aria-label="Interactive Ubuntu SSH terminal" />
     <div className="live-tabs terminal-shortcuts"><button className="period-button" disabled={!connected} onClick={() => { terminalRef.current?.input('\x03', true); terminalRef.current?.focus() }}>Ctrl+C</button><button className="period-button" disabled={!connected} onClick={() => { terminalRef.current?.input('\t', true); terminalRef.current?.focus() }}>Tab</button></div>
+    <p className="connection-hint">Use Up/Down, Ctrl+R, or <code>history</code> for server-side command history. With shared Bash history configured, commands are saved at each prompt. Press Enter at an empty prompt to import commands from another terminal of the same user. Existing sessions must load the updated Bash configuration once.</p>
     <p className="connection-hint">{identity ? `SSH login verified by Ubuntu: ${identity.username} on ${identity.hostname}.` : 'Verifying the Ubuntu login account.'} The shell prompt reflects any user changes made with su or sudo. Leaving this tab or disconnecting closes this shell.</p>
   </section>
 }

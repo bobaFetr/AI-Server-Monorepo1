@@ -95,6 +95,28 @@ invoke. Unlike dashboard buttons, commands typed here are unrestricted shell inp
 No terminal commands, output, or passwords are logged or persisted by Northstar;
 the remote shell may write its normal Linux history.
 
+### Shared Bash command history
+
+For Bash sessions of the same Linux user, install
+`scripts/bash-history-sync.bash` as `~/.config/northstar/history-sync.bash` and add
+`. "$HOME/.config/northstar/history-sync.bash"` at the end of `~/.bashrc`.
+Back up `.bashrc` and `.bash_history` before changing these settings.
+Also replace earlier finite `HISTSIZE`/`HISTFILESIZE` assignments with `-1` so
+startup does not truncate history before the shared-history hook is loaded.
+
+The hook appends pending commands and reloads shared history at each prompt,
+preserving existing prompt hooks. It enables history for commands with leading
+spaces and duplicates, with unlimited Bash history retention. `history`, Up/Down,
+and Ctrl+R then use the shared server-side history; Northstar does not maintain
+a separate browser history database. Hidden password prompts are not shell commands.
+
+Reconnect Northstar and open a new server terminal, or run `source ~/.bashrc`
+once in each already-open Bash session. Press Enter at an empty prompt to pull
+commands written by another session. Commands never saved by an older session
+cannot be recovered from disk; source the configuration there while that session
+is still open to append its pending commands. History belongs to the logged-in
+user; root or other users have separate histories. This setup is for Bash.
+
 ## Password handling and local scope
 
 The password travels to the loopback backend in a POST request (or the first terminal WebSocket message) and is used by the
