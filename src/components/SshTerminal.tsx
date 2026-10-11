@@ -10,6 +10,7 @@ export function SshTerminal({ coordinates }: { coordinates: Coordinates }) {
   const terminalRef = useRef<Terminal | null>(null)
   const [status, setStatus] = useState('Connecting to Ubuntu…')
   const [connected, setConnected] = useState(false)
+  const [connecting, setConnecting] = useState(true)
   const [identity, setIdentity] = useState<{ username: string; hostname: string } | null>(null)
   const [error, setError] = useState('')
   const [generation, setGeneration] = useState(0)
@@ -21,7 +22,7 @@ export function SshTerminal({ coordinates }: { coordinates: Coordinates }) {
     let observer: ResizeObserver | undefined
     let ready = false
     let ended = false
-    setConnected(false); setIdentity(null); setError(''); setStatus('Connecting to Ubuntu…')
+    setConnecting(true); setConnected(false); setIdentity(null); setError(''); setStatus('Connecting to Ubuntu…')
     const send = (message: object) => { if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message)) }
     async function open() {
       try {
@@ -48,22 +49,22 @@ export function SshTerminal({ coordinates }: { coordinates: Coordinates }) {
           }
           const message = JSON.parse(event.data)
           if (message.type === 'ready') {
-            ready = true; setConnected(true)
+            ready = true; setConnecting(false); setConnected(true)
             setIdentity({ username: message.username, hostname: message.hostname })
             setStatus('Connected')
             fit.fit()
             send({ type: 'resize', cols: terminal!.cols, rows: terminal!.rows })
             terminal!.focus()
           } else if (message.type === 'error') {
-            ended = true; setError(message.message); setStatus('Connection failed')
+            ready = false; ended = true; setConnecting(false); setConnected(false); setError(message.message); setStatus('Connection failed')
           } else if (message.type === 'closed') {
-            ended = true; setStatus(message.message)
+            ready = false; ended = true; setConnecting(false); setConnected(false); setStatus(message.message)
           }
         }
         socket.onerror = () => { if (!disposed) { ended = true; setError('Terminal connection failed. Restart the local development server if it was running before this update.'); setStatus('Connection failed') } }
         socket.onclose = () => {
           ready = false
-          if (!disposed) { setConnected(false); if (!ended) setStatus('Terminal disconnected'); terminal?.writeln('\r\n[Session closed]') }
+          if (!disposed) { setConnecting(false); setConnected(false); if (!ended) setStatus('Terminal disconnected'); terminal?.writeln('\r\n[Session closed]') }
         }
         terminal.onData(data => {
           if (!ready) return
@@ -74,7 +75,7 @@ export function SshTerminal({ coordinates }: { coordinates: Coordinates }) {
         observer = new ResizeObserver(() => { if (!disposed) fit.fit() })
         observer.observe(element.current)
       } catch {
-        if (!disposed) { setError('Unable to initialize the terminal.'); setStatus('Connection failed'); socket?.close() }
+        if (!disposed) { setConnecting(false); setError('Unable to initialize the terminal.'); setStatus('Connection failed'); socket?.close() }
       }
     }
     void open()
@@ -88,7 +89,7 @@ export function SshTerminal({ coordinates }: { coordinates: Coordinates }) {
   }, [host, port, username, password, generation])
 
   return <section className="panel ssh-terminal-panel">
-    <div className="panel-header"><h2><TerminalSquare size={18} /> {identity ? `${identity.username}@${identity.hostname}` : 'Ubuntu terminal'}</h2><span role="status">{status}</span><button className="period-button" disabled={connected} onClick={() => setGeneration(value => value + 1)}><RotateCcw size={16} /> Reconnect</button></div>
+    <div className="panel-header"><h2><TerminalSquare size={18} /> {identity ? `${identity.username}@${identity.hostname}` : 'Ubuntu terminal'}</h2><span role="status">{status}</span><button className="period-button" disabled={connected || connecting} onClick={() => setGeneration(value => value + 1)}><RotateCcw size={16} /> Reconnect</button></div>
     {error && <p className="live-error" role="alert">{error}</p>}
     <div ref={element} className="ssh-terminal-screen" aria-label="Interactive Ubuntu SSH terminal" />
     <div className="live-tabs terminal-shortcuts"><button className="period-button" disabled={!connected} onClick={() => { terminalRef.current?.input('\x03', true); terminalRef.current?.focus() }}>Ctrl+C</button><button className="period-button" disabled={!connected} onClick={() => { terminalRef.current?.input('\t', true); terminalRef.current?.focus() }}>Tab</button></div>

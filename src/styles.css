@@ -248,3 +248,27 @@ button:disabled { opacity: .6; cursor: wait; }
 .file-preview pre { overflow: auto; max-height: 480px; padding: 16px; background: var(--paper); font: 12px/1.6 'IBM Plex Mono', monospace; }
 .file-preview p, .file-empty { padding: 16px; color: var(--ink-soft); }
 .file-explorer > .connection-hint { padding: 0 16px 20px; }
+
+.performance-panel { margin: 24px 0; }
+.performance-panel > .panel-header { padding: 0 0 16px; flex-wrap: wrap; gap: 12px; }
+.performance-panel h2, .performance-panel h3 { display: flex; align-items: center; gap: 8px; }
+.performance-summary { display: grid; grid-template-columns: 1fr 1fr 1.35fr; gap: 14px; }
+.performance-gauge, .performance-facts, .performance-trend { min-width: 0; padding: 20px; }
+.performance-panel h3 { margin: 0 0 18px; font-size: 13px; font-weight: 600; }
+.performance-gauge p { text-align: center; color: var(--ink-soft); font-size: 11px; line-height: 1.6; }
+.performance-dial { width: 160px; height: 160px; margin: auto; padding: 10px; border-radius: 50%; }
+.performance-dial > div { height: 100%; border-radius: 50%; background: var(--panel); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.performance-dial strong { font: 600 28px 'IBM Plex Mono', monospace; }
+.performance-dial span { font-size: 10px; color: var(--ink-soft); }
+.performance-facts dl { margin: 0; }
+.performance-facts dl > div { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.performance-facts dt { font-size: 11px; color: var(--ink-soft); }
+.performance-facts dd { margin: 0; font: 500 11px 'IBM Plex Mono', monospace; }
+.performance-charts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+.performance-trend h3 { justify-content: space-between; }
+.performance-trend h3 span { font-size: 10px; font-weight: 400; color: var(--ink-soft); }
+.performance-trend svg { display: block; width: 100%; height: auto; }
+.performance-trend svg text { fill: var(--ink-soft); font: 11px 'IBM Plex Mono', monospace; }
+.performance-wait { min-height: 130px; display: grid; place-items: center; color: var(--ink-soft); font-size: 12px; text-align: center; }
+@media (max-width: 1000px) { .performance-summary { grid-template-columns: 1fr 1fr; } .performance-facts { grid-column: 1 / -1; } .performance-charts { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .performance-summary { grid-template-columns: 1fr; } }

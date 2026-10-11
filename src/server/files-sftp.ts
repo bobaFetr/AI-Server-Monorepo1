@@ -1,4 +1,5 @@
 import { Client } from 'ssh2'
+import { StringDecoder } from 'node:string_decoder'
 import type { FileEntry, FileRequest, FileResult } from './files-input.ts'
 
 const pageSize = 200
@@ -54,7 +55,11 @@ export function browseSftp(data: FileRequest, keys: string[]): Promise<FileResul
               const complete = () => sftp.close(handle, () => {
                 const bytes = buffer.subarray(0, Math.min(position, previewLimit))
                 const binary = bytes.includes(0)
-                finish({ ok: true, kind: 'file', path, content: binary ? '' : bytes.toString('utf8'), binary, truncated: position > previewLimit || stat.size > previewLimit, size: stat.size })
+                const truncated = position > previewLimit || stat.size > previewLimit
+                const decoder = new StringDecoder('utf8')
+                // A bounded preview may end inside a character; retain only complete characters.
+                const content = binary ? '' : decoder.write(bytes) + (truncated ? '' : decoder.end())
+                finish({ ok: true, kind: 'file', path, content, binary, truncated, size: stat.size })
               })
               const read = () => {
                 if (done) return

@@ -1,4 +1,5 @@
 import { Client } from 'ssh2'
+import { StringDecoder } from 'node:string_decoder'
 
 type Credentials = { host: string; port: string; username: string; password: string }
 export function passwordSsh(data: Credentials, command: string, trustedKeys: string[]): Promise<{ ok: boolean; output: string }> {
@@ -23,17 +24,23 @@ export function passwordSsh(data: Credentials, command: string, trustedKeys: str
         if (error) return finish(false, 'The server refused this operation.')
         let stdout = ''
         let stderr = ''
+        const stdoutDecoder = new StringDecoder('utf8')
+        const stderrDecoder = new StringDecoder('utf8')
         let bytes = 0
         const collect = (chunk: Buffer, isError: boolean) => {
           bytes += chunk.length
           if (bytes > 512 * 1024) return finish(false, 'Server output exceeded the 512 KB limit.')
-          if (isError) stderr += chunk.toString('utf8')
-          else stdout += chunk.toString('utf8')
+          if (isError) stderr += stderrDecoder.write(chunk)
+          else stdout += stdoutDecoder.write(chunk)
         }
         stream.on('data', (chunk: Buffer) => collect(chunk, false))
         stream.stderr.on('data', (chunk: Buffer) => collect(chunk, true))
         stream.on('error', () => finish(false, 'The SSH operation failed.'))
-        stream.on('close', (code: number | null) => finish(code === 0, code === 0 ? stdout.trim() || 'Operation completed.' : stderr.trim() || 'Remote command failed.'))
+        stream.on('close', (code: number | null) => {
+          stdout += stdoutDecoder.end()
+          stderr += stderrDecoder.end()
+          finish(code === 0, code === 0 ? stdout.trim() || 'Operation completed.' : stderr.trim() || 'Remote command failed.')
+        })
       })
     })
     try {

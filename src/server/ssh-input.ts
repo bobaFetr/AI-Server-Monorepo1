@@ -1,10 +1,17 @@
 export type Coordinates = { host: string; port: string; username: string; password: string }
 export const commands = {
   overview: "hostname && uptime && free -h && df -h / && uname -sr",
-  processes: 'LC_ALL=C top -b -n 2 -d 1 -w 180 -o %CPU',
+  processes: 'LC_ALL=C top -b -n 2 -d 1 -w 180 -E k -o %CPU',
   containers: "docker ps -a --format '{{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Image}}'",
   storage: 'df -h && lsblk',
   services: 'systemctl --no-pager --plain list-units --type=service --state=running',
+  programs: [
+    "packages=$(LC_ALL=C dpkg-query -W -f='${db:Status-Status}\\t${binary:Package}\\t${Version}\\t${Architecture}\\n') || exit 1",
+    "printf 'APT / DPKG packages (name, version, architecture)\\n'",
+    "printf '%s\\n' \"$packages\" | awk -F '\\t' '$1 == \"installed\" { print $2 \"\\t\" $3 \"\\t\" $4 }' || exit 1",
+    "if command -v snap >/dev/null 2>&1; then printf '\\nSNAP packages\\n'; snap list 2>&1 || printf 'Unable to list Snap packages.\\n'; fi",
+    "if command -v flatpak >/dev/null 2>&1; then printf '\\nFLATPAK packages\\n'; flatpak list --columns=application,version,installation 2>&1 || printf 'Unable to list Flatpak packages.\\n'; fi",
+  ].join('\n'),
   journal: 'journalctl --no-pager -n 60',
 } as const
 export type Operation = keyof typeof commands | 'start' | 'stop' | 'restart'

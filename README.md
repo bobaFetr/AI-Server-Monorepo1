@@ -35,6 +35,26 @@ and confirmed container start/stop/restart by ID. The Processes view streams com
 Docker operations require existing Docker permissions for the Ubuntu user.
 Dashboard actions do not invoke sudo. Dedicated file editing, firewall, user, and package-management views are not implemented.
 
+## Visual task manager
+
+**Processes** keeps the raw `top` process listing and adds CPU/RAM gauges,
+CPU/RAM/I/O-wait history, task counts, load averages, buffers/cache, and swap usage.
+Both views use the same completed SSH sample. History stores up to 120 samples
+in memory while the Processes view is open; it is not historical monitoring storage.
+Unavailable summaries show as unavailable. Pause and stream errors retain the last
+sample with an explicit status. Whole-server CPU is normalized to 100%; individual
+process CPU in `top` can exceed 100%. The CPU gauge sums user, system, nice, and
+interrupt execution time, excluding I/O wait and VM steal time. Memory summaries
+are collected in KiB to reduce rounding error. I/O wait is distinct from disk usage and throughput.
+
+## Programs
+
+Open **Programs** to list installed APT/DPKG packages with name, version, and
+architecture. Snap and Flatpak packages are also listed when their tools are
+available. Includes system packages and libraries; manually copied binaries and
+language-specific packages are not inventoried. Use **Refresh** after installing
+or removing software. Listing is read-only and does not use sudo.
+
 ## File Explorer
 
 Open **File Explorer** after connecting to browse the VM through SFTP. Start at `/`,

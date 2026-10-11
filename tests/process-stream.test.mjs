@@ -4,13 +4,18 @@ import { generateKeyPairSync } from 'node:crypto'
 import { once } from 'node:events'
 import ssh2 from 'ssh2'
 import { streamProcesses, monitorCommand } from '../src/server/process-stream.ts'
+import { parseProcessMetrics } from '../src/components/process-metrics.ts'
 
 test('monitor interval is allowlisted', () => {
   assert.match(monitorCommand(3), /-d 3/)
+  assert.match(monitorCommand(3), /-E k/, 'Memory summaries must not lose precision through GiB scaling')
   for (const interval of [0, -1, 100, '3;id']) assert.throws(() => monitorCommand(interval))
 })
 
 test('streams complete fresh samples over one authenticated SSH connection and cancels cleanly', async t => {
+  const summary = 'Tasks: 12 total, 1 running\n%Cpu(s): 10.0 us, 5.0 sy, 0.0 ni, 80.0 id, 4.0 wa, 0.0 hi, 1.0 si, 0.0 st\nKiB Mem : 8000000 total, 2000000 free, 3000000 used, 3000000 buff/cache\nKiB Swap: 0 total, 0 free, 0 used. 4500000 avail Mem\n'
+  const firstOutput = 'top - sample1\n' + summary + 'process one'
+  const secondOutput = 'top - sample2\n' + summary.replace('10.0 us', '30.0 us').replace('80.0 id', '60.0 id') + 'process two'
   const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048, privateKeyEncoding: { type: 'pkcs1', format: 'pem' }, publicKeyEncoding: { type: 'spki', format: 'pem' } })
   const key = ssh2.utils.parseKey(privateKey).getPublicSSH().toString('base64')
   let connections = 0
@@ -29,9 +34,9 @@ test('streams complete fresh samples over one authenticated SSH connection and c
       const channel = acceptExec()
       channel.on('error', () => {})
       // Split frames across network chunks; an initial top frame is never displayed.
-      channel.write('top - initial\nold\ntop - sample1\nprocess')
-      const first = setTimeout(() => channel.write(' one\n\x1e'), 10)
-      const second = setTimeout(() => channel.write('top - initial\nold\ntop - sample2\nprocess two\n\x1e'), 40)
+      channel.write('top - initial\nold\n' + firstOutput.slice(0, 75))
+      const first = setTimeout(() => channel.write(firstOutput.slice(75) + '\n\x1e'), 10)
+      const second = setTimeout(() => channel.write('top - initial\nold\n' + secondOutput + '\n\x1e'), 40)
       channel.on('close', () => { clearTimeout(first); clearTimeout(second) })
     })))
   })
@@ -43,8 +48,11 @@ test('streams complete fresh samples over one authenticated SSH connection and c
   const reader = stream.getReader()
   const first = JSON.parse(new TextDecoder().decode((await reader.read()).value))
   const second = JSON.parse(new TextDecoder().decode((await reader.read()).value))
-  assert.equal(first.output, 'top - sample1\nprocess one')
-  assert.equal(second.output, 'top - sample2\nprocess two')
+  assert.equal(first.output, firstOutput)
+  assert.equal(second.output, secondOutput)
+  assert.equal(parseProcessMetrics(first.output).cpu, 16)
+  assert.equal(parseProcessMetrics(second.output).cpu, 36)
+  assert.equal(parseProcessMetrics(second.output).memory, 37.5)
   assert.equal(connections, 1)
   assert.equal(commands, 1)
   assert.ok(second.sampledAt >= first.sampledAt)

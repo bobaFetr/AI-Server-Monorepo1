@@ -6,7 +6,7 @@ import type { Coordinates } from './ssh-input'
 // Reuse SSH instead of repeating authentication for every measurement.
 export function monitorCommand(interval: number) {
   if (![1, 2, 3, 5].includes(interval)) throw new Error('Unsupported sampling interval.')
-  return `while :; do LC_ALL=C top -b -n 2 -d ${interval} -w 180 -o %CPU || exit; printf '\\036'; done`
+  return `while :; do LC_ALL=C top -b -n 2 -d ${interval} -w 180 -E k -o %CPU || exit; printf '\\036'; done`
 }
 
 export function streamProcesses(data: Coordinates, keys: string[], signal: AbortSignal, onDone: () => void, interval = 3) {
@@ -45,6 +45,7 @@ export function streamProcesses(data: Coordinates, keys: string[], signal: Abort
       client.on('error', (error: Error & { level?: string }) => finish(untrusted ? 'VM host key verification failed.' : error.level === 'client-authentication' ? 'Authentication failed. Check the Ubuntu username/password and SSH password authentication.' : 'SSH monitoring connection failed.'))
       client.on('close', () => finish('SSH monitoring connection closed.'))
       client.on('ready', () => client.exec(command, (error, channel) => {
+        if (done) { channel?.close(); return }
         if (error) { finish('The VM refused the process monitor.'); return }
         channel.on('error', () => finish('The process monitor failed.'))
         channel.on('close', () => finish('The process monitor stopped. Check that top (procps) is installed.'))

@@ -28,6 +28,7 @@ test('SFTP lists hidden entries, paginates, follows links, previews files and re
     ...Array.from({ length: 201 }, (_, index) => ({ filename: `file-${index}`, attrs: regular })),
   ]
   const contents = { '/text': Buffer.from('Hello from Ubuntu\n'), '/binary': Buffer.from([0, 1, 2]), '/large': Buffer.alloc(70000, 65), '/empty': Buffer.alloc(0), '/a b;$(id)': Buffer.from('literal filename') }
+  contents['/unicode-boundary'] = Buffer.concat([Buffer.alloc(65535, 65), Buffer.from('日本語')])
   let shellRequests = 0
   const ssh = new ssh2.Server({ hostKeys: [privateKey] }, client => {
     clients.add(client); client.on('error', () => {}); client.on('close', () => clients.delete(client))
@@ -85,6 +86,9 @@ test('SFTP lists hidden entries, paginates, follows links, previews files and re
   assert.equal((await browse('/binary')).binary, true)
   assert.equal((await browse('/empty')).content, '')
   const large = await browse('/large'); assert.equal(large.truncated, true); assert.equal(large.content.length, 65536)
+  const unicode = await browse('/unicode-boundary')
+  assert.equal(unicode.truncated, true)
+  assert.equal(unicode.content, 'A'.repeat(65535), 'Preview must not manufacture a replacement character at the byte limit')
   assert.match((await browse('/denied')).error, /Permission denied/)
   assert.match((await browse('/missing')).error, /no longer exists/)
   assert.match((await browse('/device')).error, /special file/)

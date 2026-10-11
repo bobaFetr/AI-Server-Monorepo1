@@ -33,7 +33,10 @@ export function terminalPlugin(): Plugin {
         })
       }
       server.httpServer?.on('upgrade', upgrade)
+      let cleanedUp = false
       const cleanup = () => {
+        if (cleanedUp) return
+        cleanedUp = true
         server.httpServer?.off('upgrade', upgrade)
         for (const close of sessions) close()
         for (const socket of wss.clients) socket.terminate()

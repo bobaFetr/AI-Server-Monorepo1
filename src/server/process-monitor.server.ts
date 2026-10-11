@@ -15,6 +15,7 @@ export async function processMonitor(request: Request) {
     const body = await request.text()
     if (body.length > 8192) throw new Error('Monitoring request is too large.')
     const input = JSON.parse(body)
+    if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Invalid monitoring request.')
     const interval = input.interval ?? 3
     if (![1, 2, 3, 5].includes(interval)) throw new Error('Unsupported sampling interval.')
     const data = validateInput({ ...input, operation: 'processes' })
