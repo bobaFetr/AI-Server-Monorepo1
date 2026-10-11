@@ -11,12 +11,19 @@ test('process messages reject malformed types and invalid timestamps', () => {
 })
 test('process decoder handles Unicode fragmented byte by byte and multiple frames', () => {
   const decoder = new ProcessMessageDecoder()
-  const sample = { output: 'top — café 日本語', sampledAt: 123 }
+  const sample = { output: 'top — café 日本語', sampledAt: 123, completionDelayMs: 1000 }
   const bytes = new TextEncoder().encode(JSON.stringify(sample) + '\n')
   const results = []
   for (const byte of bytes) results.push(...decoder.push(new Uint8Array([byte])))
   assert.deepEqual(results, [sample])
   assert.deepEqual(decoder.push(new TextEncoder().encode(JSON.stringify(sample) + '\n' + JSON.stringify(sample) + '\n')), [sample, sample])
+})
+
+test('completion delay is validated and older messages remain compatible', () => {
+  assert.deepEqual(parseProcessMessage('{"output":"top","sampledAt":123}'), { output: 'top', sampledAt: 123, completionDelayMs: 0 })
+  for (const completionDelayMs of [null, -1, '1000', Infinity]) {
+    assert.throws(() => parseProcessMessage(JSON.stringify({ output: 'top', sampledAt: 123, completionDelayMs })), /Invalid process/)
+  }
 })
 test('process decoder bounds unfinished and completed messages and rejects invalid UTF-8', () => {
   assert.throws(() => new ProcessMessageDecoder().push(new TextEncoder().encode('x'.repeat(1024 * 1024 + 1))), /size limit/)

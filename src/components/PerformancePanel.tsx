@@ -1,5 +1,7 @@
 import { Activity, Cpu, MemoryStick } from 'lucide-react'
 import type { PerformanceSample } from './process-metrics'
+import { trendScale } from './trend-scale'
+import { historyWindow, historyX } from './history-window'
 
 function bytes(value: number | null) {
   if (value === null) return 'Unavailable'
@@ -14,22 +16,23 @@ function Gauge({ title, value, detail, kind }: { title: string; value: number | 
   </article>
 }
 function Trend({ title, samples, field, color }: { title: string; samples: PerformanceSample[]; field: 'cpu' | 'memory' | 'ioWait'; color: string }) {
+  const window = historyWindow(samples)
+  samples = window.samples
   const points = samples.filter(sample => sample[field] !== null)
-  const first = samples[0]?.sampledAt ?? 0
-  const last = samples.at(-1)?.sampledAt ?? first
+  const scale = trendScale(points.map(sample => sample[field]!))
+  const y = (value: number) => 150 - (value - scale.min) / (scale.max - scale.min) * 130
   let penDown = false
   const path = samples.map(sample => {
     if (sample[field] === null) { penDown = false; return '' }
     const command = penDown && !sample.breakBefore ? 'L' : 'M'
     penDown = true
-    return `${command}${40 + (sample.sampledAt - first) / Math.max(1, last - first) * 510},${150 - sample[field]! * 1.3}`
+    return `${command}${historyX(sample.sampledAt, window.start)},${y(sample[field]!)}`
   }).join(' ')
-  return <article className="panel performance-trend"><h3>{title}<span>0–100%</span></h3>
+  return <article className="panel performance-trend"><h3>{title}<span>Auto · {scale.min.toFixed(1)}–{scale.max.toFixed(1)}%</span></h3>
     {points.length === 0 ? <p className="performance-wait">Waiting for available metrics…</p> : <svg viewBox="0 0 570 185" role="img" aria-label={`${title}: ${samples.at(-1)?.[field] === null ? 'latest sample unavailable' : `latest ${points.at(-1)![field]!.toFixed(1)} percent`}, ${points.length} recorded samples`}>
-      {[0, 50, 100].map(value => <g key={value}><line x1="40" x2="550" y1={150 - value * 1.3} y2={150 - value * 1.3} stroke="var(--line)" /><text x="2" y={154 - value * 1.3}>{value}%</text></g>)}
+      {[scale.min, (scale.min + scale.max) / 2, scale.max].map(value => <g key={value}><line x1="40" x2="550" y1={y(value)} y2={y(value)} stroke="var(--line)" /><text x="0" y={y(value) + 4}>{value.toFixed(1)}%</text></g>)}
       <path d={path} fill="none" stroke={color} strokeWidth="2.5" />
-      {points.map((sample, index) => <circle key={index} cx={40 + (sample.sampledAt - first) / Math.max(1, last - first) * 510} cy={150 - sample[field]! * 1.3} r="2" fill={color}><title>{`${new Date(sample.sampledAt).toLocaleTimeString()}: ${sample[field]!.toFixed(1)}%`}</title></circle>)}
-      <text x="40" y="178">{new Date(first).toLocaleTimeString()}</text><text x="550" y="178" textAnchor="end">{new Date(last).toLocaleTimeString()}</text>
+      <text x="40" y="178">60 seconds ago</text><text x="550" y="178" textAnchor="end">Latest sample</text>
     </svg>}
   </article>
 }
@@ -50,6 +53,6 @@ export function PerformancePanel({ samples, status }: { samples: PerformanceSamp
     </div>
     <div className="performance-charts"><Trend title="CPU history" samples={samples} field="cpu" color="var(--orange)" /><Trend title="RAM history" samples={samples} field="memory" color="var(--green)" /><Trend title="I/O wait history" samples={samples} field="ioWait" color="var(--blue)" /></div>
     {current && (current.cpu === null || current.memory === null || current.ioWait === null) && <p className="connection-hint" role="status">Some metrics are unavailable in the latest top summary. Previous chart points remain historical data. Check that top displays detailed, whole-server CPU and memory summaries.</p>}
-    <p className="connection-hint">History contains up to 120 samples collected in this view. It resets when you leave Processes. CPU shows execution time across all cores on a 0–100% scale; I/O wait and stolen VM time are excluded. RAM uses top's used/total values collected in KiB. These are interval samples, not instantaneous readings. Charts retain the last samples when updates stop.</p>
+    <p className="connection-hint">All three charts show a rolling 60-second window. Each new sample moves the line left and removes expired values; pausing freezes the window. Chart axes scale automatically; gauges use 0–100%. Constant measurements remain flat. CPU excludes I/O wait and stolen VM time. RAM uses top's used/total values in KiB. The first result takes about two sampling intervals; complete frames arrive one interval after measurement.</p>
   </section>
 }

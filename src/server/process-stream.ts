@@ -2,11 +2,10 @@ import { Client } from 'ssh2'
 import { StringDecoder } from 'node:string_decoder'
 import type { Coordinates } from './ssh-input'
 
-// A delimiter after each completed measurement avoids rendering partial frames.
-// Reuse SSH instead of repeating authentication for every measurement.
+// Keep top running: restarting it between samples adds startup overhead and resets CPU counters.
 export function monitorCommand(interval: number) {
   if (![1, 2, 3, 5].includes(interval)) throw new Error('Unsupported sampling interval.')
-  return `while :; do LC_ALL=C top -b -n 2 -d ${interval} -w 180 -E k -o %CPU || exit; printf '\\036'; done`
+  return `LC_ALL=C stdbuf -oL top -b -d ${interval} -w 180 -E k -o %CPU`
 }
 
 export function streamProcesses(data: Coordinates, keys: string[], signal: AbortSignal, onDone: () => void, interval = 3) {
@@ -18,6 +17,9 @@ export function streamProcesses(data: Coordinates, keys: string[], signal: Abort
       const encoder = new TextEncoder()
       const decoder = new StringDecoder('utf8')
       let buffer = ''
+      let frameStartedAt = 0
+      let frameStartedMonotonic = 0
+      let initialFrame = true
       let done = false
       let untrusted = false
       let deadline: ReturnType<typeof setTimeout>
@@ -47,6 +49,7 @@ export function streamProcesses(data: Coordinates, keys: string[], signal: Abort
       client.on('ready', () => client.exec(command, (error, channel) => {
         if (done) { channel?.close(); return }
         if (error) { finish('The VM refused the process monitor.'); return }
+        resetDeadline()
         channel.on('error', () => finish('The process monitor failed.'))
         channel.on('close', () => finish('The process monitor stopped. Check that top (procps) is installed.'))
         channel.stderr.on('data', () => { /* Do not expose arbitrary server diagnostic output. */ })
@@ -54,15 +57,28 @@ export function streamProcesses(data: Coordinates, keys: string[], signal: Abort
           if (done) return
           buffer += decoder.write(chunk)
           if (Buffer.byteLength(buffer) > 1024 * 1024) { finish('Process sample exceeded the size limit.'); return }
-          let separator: number
-          while ((separator = buffer.indexOf('\x1e')) !== -1) {
-            const sample = buffer.slice(0, separator)
-            buffer = buffer.slice(separator + 1)
-            const frames = sample.split(/(?=^top - )/m).filter(frame => frame.startsWith('top - '))
-            if (frames.length !== 2) { finish('Incomplete process sample received.'); return }
-            if ((controller.desiredSize ?? 0) <= 0) { finish('Monitoring paused because the browser cannot keep up.'); return }
-            controller.enqueue(encoder.encode(JSON.stringify({ output: frames[1].trim(), sampledAt: Date.now() }) + '\n'))
+          // A subsequent header proves the preceding frame is complete, regardless of SSH chunk boundaries.
+          if (!frameStartedAt) {
+            const firstHeader = buffer.search(/^top - /m)
+            if (firstHeader === -1) return
+            buffer = buffer.slice(firstHeader)
+            frameStartedAt = Date.now()
+            frameStartedMonotonic = performance.now()
             resetDeadline()
+          }
+          let nextHeader: number
+          while ((nextHeader = buffer.slice(6).search(/^top - /m)) !== -1) {
+            nextHeader += 6
+            const output = buffer.slice(0, nextHeader).trim()
+            const sampledAt = frameStartedAt
+            const completionDelayMs = Math.max(0, performance.now() - frameStartedMonotonic)
+            buffer = buffer.slice(nextHeader)
+            frameStartedAt = Date.now()
+            frameStartedMonotonic = performance.now()
+            resetDeadline()
+            if (initialFrame) { initialFrame = false; continue }
+            if ((controller.desiredSize ?? 0) <= 0) { finish('Monitoring paused because the browser cannot keep up.'); return }
+            controller.enqueue(encoder.encode(JSON.stringify({ output, sampledAt, completionDelayMs }) + '\n'))
           }
         })
       }))
@@ -74,5 +90,5 @@ export function streamProcesses(data: Coordinates, keys: string[], signal: Abort
       } catch { finish('Unable to start process monitoring.') }
     },
     cancel() { stop() },
-  })
+  }, { highWaterMark: 4 })
 }

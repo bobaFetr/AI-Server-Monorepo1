@@ -1,5 +1,5 @@
 import { getRequest } from '@tanstack/react-start/server'
-import { commands, type SshInput } from './ssh-input'
+import { commandForInput, type SshInput } from './ssh-input'
 import { assertLocalRequest } from './local-request'
 import { passwordSsh } from './password-ssh'
 import { latestProcessSnapshot } from './process-snapshot'
@@ -14,7 +14,7 @@ export async function executeSsh(data: SshInput): Promise<{ ok: boolean; output:
     let keys: string[]
     try { keys = await trustedHostKeys(data.host, data.port) }
     catch (error) { return { ok: false, output: error instanceof Error ? error.message : 'Host verification failed.' } }
-    const command = Object.hasOwn(commands, data.operation) ? commands[data.operation as keyof typeof commands] : `docker ${data.operation} ${data.container}`
+    const command = commandForInput(data)
     const result = await passwordSsh(data, command, keys)
     if (result.ok && data.operation === 'processes') {
       try { return { ok: true, output: latestProcessSnapshot(result.output) } }

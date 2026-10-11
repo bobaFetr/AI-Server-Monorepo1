@@ -1,5 +1,5 @@
 const maxMessageLength = 1024 * 1024
-export type ProcessMessage = { output: string; sampledAt: number } | { error: string }
+export type ProcessMessage = { output: string; sampledAt: number; completionDelayMs: number } | { error: string }
 
 export function parseProcessMessage(line: string): ProcessMessage {
   if (line.length > maxMessageLength) throw new Error('Process sample exceeded the size limit.')
@@ -9,7 +9,9 @@ export function parseProcessMessage(line: string): ProcessMessage {
   const message = data as Record<string, unknown>
   if (typeof message.error === 'string' && message.error.length > 0 && message.error.length <= 4096) return { error: message.error }
   if (typeof message.output !== 'string' || typeof message.sampledAt !== 'number' || !Number.isSafeInteger(message.sampledAt) || message.sampledAt <= 0 || message.sampledAt > 8.64e15) throw new Error('Invalid process monitoring response.')
-  return { output: message.output, sampledAt: message.sampledAt }
+  const completionDelayMs = message.completionDelayMs === undefined ? 0 : message.completionDelayMs
+  if (typeof completionDelayMs !== 'number' || !Number.isFinite(completionDelayMs) || completionDelayMs < 0) throw new Error('Invalid process monitoring response.')
+  return { output: message.output, sampledAt: message.sampledAt, completionDelayMs }
 }
 
 export class ProcessMessageDecoder {

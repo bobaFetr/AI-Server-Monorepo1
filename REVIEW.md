@@ -77,4 +77,45 @@ The installed packages and successful typecheck/build remain the compatibility c
 - Stream integration coverage now replays full top summaries split across SSH chunks and verifies both raw output and CPU/RAM values from the delivered frames. Additional cases test I/O-bound and VM steal scenarios.
 - 28 tests pass without skips; typecheck and production build pass. These controlled checks do not establish agreement with the user's real VM at an identical sampling instant. CPU categories are rounded by top and displayed to one decimal; separately running tools use different sampling windows.
 
+### History refresh correction
+
+Replaced repeatedly restarted top processes with one line-buffered continuous top
+process per monitor. Frame boundaries are detected across SSH chunks; the first
+lifetime-average frame is discarded. Later complete frames are published at the
+chosen interval, timestamped when their header arrived rather than when published.
+Completion requires the following header, adding one interval of display latency;
+initial collection takes two intervals. History charts now use explicitly labelled
+automatic percentage ranges so small changes are visible without inventing movement.
+Tests include one-second SSH frame delivery and bounded scales for low/constant values.
+
+### Sampling option review
+
+Fixed the stale-data threshold to allow the normal one-frame completion delay at
+all four intervals: normal sample age can reach twice the selected interval.
+The SSH sample deadline now restarts after authentication and the first header,
+so setup time does not consume the first sample's timeout budget. A bounded queue
+allows up to four frames, preventing a normal small batch of SSH data from closing
+an otherwise healthy stream. Tests exercise actual timed 1/2/3/5-second fixture
+delivery, normal/stale ages for each option, buffered frames, and abort cleanup.
+These are loopback SSH fixtures; no real Ubuntu VM or browser timing was measured.
+
+### Rolling history display
+
+All three history charts now share a fixed 60-second window ending at the latest
+sample. Earlier samples move left at each update and expire rather than compressing
+an accumulating history into the chart. Removed all point markers. Pause freezes
+the displayed window; resuming expires samples outside the new window. Targeted
+tests verify identical duration and movement at 1/2/3/5-second intervals, expiration,
+and scale behavior. Four targeted tests, TypeScript, and production build passed.
+
+### Delayed-data status
+
+The earlier age-based warning combined normal frame-completion delay with time
+waiting for the next update. It could flicker for a regularly arriving, slower stream.
+The status now distinguishes silence since receipt from completion latency, using
+monotonic clocks on each side. Backend messages include validated completionDelayMs;
+older messages remain compatible. Old completed frames and true update stalls remain
+delayed. Real-server checks at 1/3/5 seconds stayed healthy through nine samples;
+42 automated tests, TypeScript, and build pass.
+
 The existing 15 tests passed before changes, TypeScript passed, and the production build completed with dependency unused-import warnings. Final verification is reported in the chat. No real Ubuntu VM or browser visual checks were performed. Generated deployment files remain ignored.

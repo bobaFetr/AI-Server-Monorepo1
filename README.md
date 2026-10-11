@@ -46,6 +46,15 @@ sample with an explicit status. Whole-server CPU is normalized to 100%; individu
 process CPU in `top` can exceed 100%. The CPU gauge sums user, system, nice, and
 interrupt execution time, excluding I/O wait and VM steal time. Memory summaries
 are collected in KiB to reduce rounding error. I/O wait is distinct from disk usage and throughput.
+The monitor runs one continuous top process. The first lifetime-average frame is
+discarded; subsequent frames are emitted once the next header confirms completion.
+Initial collection takes about two sampling intervals, then results arrive at the
+selected interval with a one-interval completion delay. Sample timestamps identify
+the frame's measurement time. History charts auto-scale with labelled percentage
+axes to reveal small real changes; unchanging measurements remain flat.
+CPU, RAM, and I/O-wait charts display a fixed rolling 60-second window with line
+traces only. Each new sample shifts earlier values left; values older than the
+window disappear. The window freezes while paused and advances on the next sample.
 
 ## Programs
 

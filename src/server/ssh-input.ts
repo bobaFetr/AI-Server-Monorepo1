@@ -29,3 +29,10 @@ export function validateInput(input: unknown): SshInput {
   if (['start', 'stop', 'restart'].includes(operation) && (typeof data.container !== 'string' || !/^[a-f0-9]{12,64}$/.test(data.container))) throw new Error('Enter a container ID from the container list.')
   return { host: data.host, username: data.username, password: data.password, port: data.port, operation: operation as Operation, container: typeof data.container === 'string' ? data.container : undefined }
 }
+
+export function commandForInput(input: unknown): string {
+  const data = validateInput(input)
+  return Object.hasOwn(commands, data.operation)
+    ? commands[data.operation as keyof typeof commands]
+    : `docker ${data.operation} ${data.container}`
+}
